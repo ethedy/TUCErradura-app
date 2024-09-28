@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> log = [];
 
   Future<void> _sendRequest(String action) async {
-    final url = '$esp8266Ip/led/$action';
+    final url = '$esp8266Ip/door/$action';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
