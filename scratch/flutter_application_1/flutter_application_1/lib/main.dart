@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PURTA - ESP8266'),
+        title: const Text('PUERTA - ESP8266'),
       ),
       body: Column(
         children: <Widget>[
