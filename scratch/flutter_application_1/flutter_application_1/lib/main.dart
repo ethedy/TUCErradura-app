@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LED ESP8266'),
+        title: const Text('PURTA - ESP8266'),
       ),
       body: Column(
         children: <Widget>[
@@ -59,12 +59,12 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               ElevatedButton(
                 onPressed: () => _sendRequest('on'),
-                child: const Text('Encender LED'),
+                child: const Text('ABRIR'),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () => _sendRequest('off'),
-                child: const Text('Apagar LED'),
+                child: const Text('CERRAR'),
               ),
             ],
           ),
