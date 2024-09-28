@@ -58,12 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ElevatedButton(
-                onPressed: () => _sendRequest('on'),
+                onPressed: () => _sendRequest('open'),
                 child: const Text('ABRIR'),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
-                onPressed: () => _sendRequest('off'),
+                onPressed: () => _sendRequest('closed'),
                 child: const Text('CERRAR'),
               ),
             ],
