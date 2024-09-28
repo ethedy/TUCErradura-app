@@ -51,6 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('PUERTA - ESP8266'),
+        shadowColor: Colors.grey,
+        scrolledUnderElevation: 20.0,
       ),
       body: Column(
         children: <Widget>[
@@ -61,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () => _sendRequest('open'),
                 child: const Text('ABRIR'),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 50),
               ElevatedButton(
                 onPressed: () => _sendRequest('closed'),
                 child: const Text('CERRAR'),
