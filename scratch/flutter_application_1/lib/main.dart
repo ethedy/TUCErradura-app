@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Control de LED ESP8266',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: MyHomePage(),
     );
@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('PUERTA - ESP8266'),
-        shadowColor: Colors.grey,
+        shadowColor: Colors.blue,
         scrolledUnderElevation: 20.0,
       ),
       body: Column(
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               ElevatedButton(
                 onPressed: () => _sendRequest('open'),
-                child: const Text('ABRIR'),
+                child: const Text('ABRIR!'),
               ),
               const SizedBox(width: 50),
               ElevatedButton(
