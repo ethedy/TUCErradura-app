@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -50,9 +49,29 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PUERTA - ESP8266'),
-        shadowColor: Colors.blue,
+        title: const Text(
+          'PUERTA - ESP8266',
+          style: TextStyle(
+            color: Color.fromARGB(255, 19, 15, 15),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: Colors.blue,
+        shadowColor: Colors.grey,
         scrolledUnderElevation: 20.0,
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF4C60AF),
+                Color.fromARGB(255, 37, 195, 248),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: <Widget>[
@@ -61,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               ElevatedButton(
                 onPressed: () => _sendRequest('open'),
-                child: const Text('ABRIR!'),
+                child: const Text('ABRIR'),
               ),
               const SizedBox(width: 50),
               ElevatedButton(
@@ -73,9 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: ListView.builder(
               itemCount: log.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   title: Text(log[index]),
+                  onTap: () {},
                 );
               },
             ),
