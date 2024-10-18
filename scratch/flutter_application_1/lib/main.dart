@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:network_info_plus/network_info_plus.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,12 +27,48 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final String esp8266Ip =
-      'http://192.168.100.79'; // Reemplazar a IP del ESP8266
+  String baseIp = 'http://192.168.100.1'; // Cambia esto según tu red
+  List<String> devices = [];
   List<String> log = [];
 
-  Future<void> _sendRequest(String action) async {
-    final url = '$esp8266Ip/door/$action';
+  @override
+  void initState() {
+    super.initState();
+    getLocalIp();
+  }
+
+  Future<void> getLocalIp() async {
+    final info = NetworkInfo();
+    String? wifiIP = await info.getWifiIP();
+    if (wifiIP != null) {
+      setState(() {
+        baseIp = wifiIP.split('.').sublist(0, 3).join('.');
+      });
+    }
+  }
+
+  Future<void> scanDevices() async {
+    devices.clear();
+    for (int i = 1; i < 255; i++) {
+      String ip = '$baseIp.$i';
+      try {
+        final response = await http.get(Uri.parse('$ip/get_mac'));
+        if (response.statusCode == 200) {
+          devices.add('$ip: ${response.body}');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+    setState(() {
+      if (devices.isEmpty) {
+        log.add('No se encontraron dispositivos.');
+      }
+    });
+  }
+
+  Future<void> _sendRequest(String action, String ip) async {
+    final url = '$ip/door/$action';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -75,31 +112,50 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton(
-                onPressed: () => _sendRequest('open'),
-                child: const Text('ABRIR'),
-              ),
-              const SizedBox(width: 50),
-              ElevatedButton(
-                onPressed: () => _sendRequest('closed'),
-                child: const Text('CERRAR'),
-              ),
-            ],
+          ElevatedButton(
+            onPressed: scanDevices,
+            child: const Text('Iniciar Escaneo'),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: log.length,
+              itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(log[index]),
-                  onTap: () {},
+                  title: Text(devices[index]),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title:
+                              Text('Seleccionar acción para ${devices[index]}'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                _sendRequest(
+                                    'open', devices[index].split(':')[0]);
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('ABRIR'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                _sendRequest(
+                                    'closed', devices[index].split(':')[0]);
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('CERRAR'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 );
               },
             ),
           ),
+          //agregar un ListView para mostrar logs
         ],
       ),
     );
