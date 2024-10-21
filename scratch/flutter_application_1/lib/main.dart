@@ -23,6 +23,7 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -121,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
+                  // widget que representa una fila en una lista.
                   title: Text(devices[index]),
                   onTap: () {
                     showDialog(
@@ -132,8 +134,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           actions: [
                             TextButton(
                               onPressed: () {
+                                //Esta es una llamada a una función
                                 _sendRequest(
-                                    'open', devices[index].split(':')[0]);
+                                    //'open': Este es el primer argumento que se pasa a _sendRequest.
+                                    //Indica la acción que se desea realizar
+                                    'open',
+                                    devices[index].split(':')[0]);
                                 Navigator.of(context).pop();
                               },
                               child: const Text('ABRIR'),
@@ -155,7 +161,17 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          //agregar un ListView para mostrar logs
+          Expanded(
+            child: ListView.builder(
+              itemCount: log.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(log[index]),
+                );
+              },
+            ),
+          ),
+          //Se agrega un ListView para mostrar logs
         ],
       ),
     );
