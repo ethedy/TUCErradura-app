@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:network_info_plus/network_info_plus.dart';
+//import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Control de LED ESP8266',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
     );
@@ -28,48 +28,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String baseIp = 'http://192.168.100.1'; // Cambia esto según tu red
-  List<String> devices = [];
+  final String esp8266Ip =
+      'http://192.168.100.79'; // Reemplazar a IP del ESP8266
   List<String> log = [];
 
-  @override
-  void initState() {
-    super.initState();
-    getLocalIp();
-  }
-
-  Future<void> getLocalIp() async {
-    final info = NetworkInfo();
-    String? wifiIP = await info.getWifiIP();
-    if (wifiIP != null) {
-      setState(() {
-        baseIp = wifiIP.split('.').sublist(0, 3).join('.');
-      });
-    }
-  }
-
-  Future<void> scanDevices() async {
-    devices.clear();
-    for (int i = 1; i < 255; i++) {
-      String ip = '$baseIp.$i';
-      try {
-        final response = await http.get(Uri.parse('$ip/get_mac'));
-        if (response.statusCode == 200) {
-          devices.add('$ip: ${response.body}');
-        }
-      } catch (e) {
-        print('Error: $e');
-      }
-    }
-    setState(() {
-      if (devices.isEmpty) {
-        log.add('No se encontraron dispositivos.');
-      }
-    });
-  }
-
-  Future<void> _sendRequest(String action, String ip) async {
-    final url = '$ip/door/$action';
+  Future<void> _sendRequest(String action) async {
+    final url = '$esp8266Ip/door/$action';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -87,79 +51,25 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'PUERTA - ESP8266',
-          style: TextStyle(
-            color: Color.fromARGB(255, 19, 15, 15),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: Colors.blue,
+        title: const Text('PUERTA - ESP8266'),
         shadowColor: Colors.grey,
         scrolledUnderElevation: 20.0,
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF4C60AF),
-                Color.fromARGB(255, 37, 195, 248),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
       ),
       body: Column(
         children: <Widget>[
-          ElevatedButton(
-            onPressed: scanDevices,
-            child: const Text('Iniciar Escaneo'),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: devices.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  // widget que representa una fila en una lista.
-                  title: Text(devices[index]),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title:
-                              Text('Seleccionar acción para ${devices[index]}'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                //Esta es una llamada a una función
-                                _sendRequest(
-                                    //'open': Este es el primer argumento que se pasa a _sendRequest.
-                                    //Indica la acción que se desea realizar
-                                    'open',
-                                    devices[index].split(':')[0]);
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('ABRIR'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                _sendRequest(
-                                    'closed', devices[index].split(':')[0]);
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('CERRAR'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () => _sendRequest('open'),
+                child: const Text('ABRIR'),
+              ),
+              const SizedBox(width: 50),
+              ElevatedButton(
+                onPressed: () => _sendRequest('closed'),
+                child: const Text('CERRAR'),
+              ),
+            ],
           ),
           Expanded(
             child: ListView.builder(
@@ -171,7 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          //Se agrega un ListView para mostrar logs
         ],
       ),
     );
