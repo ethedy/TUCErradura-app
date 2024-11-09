@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Screens/Sign_In_Page.dart';
 
 class Body extends StatelessWidget {
   @override
@@ -20,7 +21,11 @@ class Body extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) {return }LoginScreen()),
+                MaterialPageRoute(
+                  builder: (context) {
+                    return SignInPage();
+                  },
+                ),
               );
             },
             child: Text('Iniciar Sesion'),
