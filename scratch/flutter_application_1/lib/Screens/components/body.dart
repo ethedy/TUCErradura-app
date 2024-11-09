@@ -7,7 +7,29 @@ class Body extends StatelessWidget {
         body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [],
+        children: [
+          Text(
+            'Inicia sesión',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 40),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {return }LoginScreen()),
+              );
+            },
+            child: Text('Iniciar Sesion'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15),
+              textStyle: TextStyle(fontSize: 18),
+            ),
+          )
+        ],
       ),
     ));
   }
