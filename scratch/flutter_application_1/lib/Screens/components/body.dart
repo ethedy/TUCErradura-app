@@ -30,8 +30,11 @@ class Body extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 20),
-                minimumSize: Size(0, 50),
+                minimumSize: Size(220, 50),
                 alignment: Alignment.center,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(
                 'Iniciar Sesión',

@@ -1,55 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Screens/Login/components/email.dart';
+import 'package:flutter_application_1/Screens/Login/components/password.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    return Accountlog();
+  }
+}
 
+class Accountlog extends StatelessWidget {
+  const Accountlog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Imagen SVG en la parte superior
-            SvgPicture.asset(
-              "assets/icons/Background.svg",
-              height: size.height * 0.30, // Ajusta el tamaño de la imagen
-            ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SvgPicture.asset(
+                "assets/images/Background.svg", //logo IPS
+                height: size.height * 0.30,
+              ),
 
-            // Espacio entre la imagen y los campos de entrada
-            SizedBox(height: 20),
+              SizedBox(height: 20),
 
-            // Formulario de inicio de sesión
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
+              // Formulario de inicio de sesión
+              Column(
                 children: [
                   // Campo de correo electrónico
-                  TextField(
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: "Correo electrónico",
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                  TextEmail(
+                    onChanged: (value) {},
                   ),
                   SizedBox(height: 15),
 
                   // Campo de contraseña
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Contraseña",
-                      prefixIcon: Icon(Icons.lock),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                  Password(
+                    onChanged: (value) {},
                   ),
                   SizedBox(height: 20),
+
+                  Container(
+                    width: size.width * 0.8,
+                    child: Row(
+                      children: <Widget>[
+                        Divider(
+                          height: 1.5,
+                        ),
+                        Text("OR")
+                      ],
+                    ),
+                  ),
 
                   // Botón de inicio de sesión con Google
                   ElevatedButton.icon(
@@ -60,7 +69,7 @@ class SignInPage extends StatelessWidget {
                     label: Text("Iniciar sesión con Google"),
                     style: ElevatedButton.styleFrom(
                       minimumSize: Size(double.infinity, 50),
-                      backgroundColor: Colors.blue, // Color del botón
+                      backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -68,19 +77,8 @@ class SignInPage extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-
-            // Espacio debajo del botón de Google
-            SizedBox(height: 20),
-
-            // Opción para crear cuenta
-            TextButton(
-              onPressed: () {
-                // Lógica para redirigir a la pantalla de registro
-              },
-              child: Text("¿No tienes una cuenta? Regístrate"),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
