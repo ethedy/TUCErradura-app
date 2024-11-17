@@ -1,33 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-//import 'dart:convert';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class AccionesReq extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Control de LED ESP8266',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: Acciones(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class Acciones extends StatefulWidget {
+  const Acciones({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _MyHomePageState createState() => _MyHomePageState();
+  _AccionesState createState() => _AccionesState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _AccionesState extends State<Acciones> {
   final String esp8266Ip =
       'http://192.168.100.79'; // Reemplazar a IP del ESP8266
   List<String> log = [];
@@ -50,11 +43,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PUERTA - ESP8266'),
-        shadowColor: Colors.grey,
-        scrolledUnderElevation: 20.0,
-      ),
       body: Column(
         children: <Widget>[
           Row(

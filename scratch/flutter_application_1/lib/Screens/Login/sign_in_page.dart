@@ -1,84 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Screens/Login/components/email.dart';
-import 'package:flutter_application_1/Screens/Login/components/password.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_application_1/Runner/acciones_req.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class SignInPage extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Accountlog();
-  }
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class Accountlog extends StatelessWidget {
-  const Accountlog({
-    super.key,
-  });
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // URL del ESP8266
+  final String esp8266Ip =
+      'http://192.168.100.79'; // Reemplazar a IP del ESP8266
+
+  // Función para hacer la solicitud POST
+  Future<void> _login() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    // Verificamos que los campos no estén vacíos
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Por favor, ingresa todos los campos"),
+      ));
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(esp8266Ip),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "email": email,
+          "password": password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Si la respuesta del ESP8266 es exitosa
+        var data = json.decode(response.body);
+        if (data["status"] == "success") {
+          // Si el login es exitoso, navegar a la siguiente pantalla
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Acciones()),
+          );
+        } else {
+          // Si las credenciales son incorrectas
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Credenciales incorrectas"),
+          ));
+        }
+      } else {
+        // Error en la solicitud HTTP
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Error al conectar con el servidor"),
+        ));
+      }
+    } catch (e) {
+      // Si hay algún error con la conexión
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error de red: $e"),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              SvgPicture.asset(
-                "assets/images/Background.svg", //logo IPS
-                height: size.height * 0.30,
-              ),
-
-              SizedBox(height: 20),
-
-              // Formulario de inicio de sesión
-              Column(
-                children: [
-                  // Campo de correo electrónico
-                  TextEmail(
-                    onChanged: (value) {},
-                  ),
-                  SizedBox(height: 15),
-
-                  // Campo de contraseña
-                  Password(
-                    onChanged: (value) {},
-                  ),
-                  SizedBox(height: 20),
-
-                  Container(
-                    width: size.width * 0.8,
-                    child: Row(
-                      children: <Widget>[
-                        Divider(
-                          height: 1.5,
-                        ),
-                        Text("OR")
-                      ],
-                    ),
-                  ),
-
-                  // Botón de inicio de sesión con Google
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Lógica para iniciar sesión con Google
-                    },
-                    icon: Icon(Icons.login),
-                    label: Text("Iniciar sesión con Google"),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      appBar: AppBar(title: Text("Iniciar sesión")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Correo electrónico'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Contraseña'),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _login,
+              child: Text("Ingresar"),
+            ),
+          ],
         ),
       ),
     );
