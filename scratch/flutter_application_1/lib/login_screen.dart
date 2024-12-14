@@ -24,9 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Verificamos que los campos no estén vacíos
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Por favor, ingresa todos los campos"),
-      ));
+      // Mostrar un AlertDialog si algún campo está vacío
+      _showDialog(
+        context,
+        'Campos Vacíos',
+        'Por favor, ingresa todos los campos',
+      );
       return;
     }
 
@@ -51,22 +54,45 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         } else {
           // Si las credenciales son incorrectas
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Credenciales incorrectas"),
-          ));
+          _showDialog(
+            context,
+            'Credenciales Incorrectas',
+            'El correo electrónico o la contraseña son incorrectos.',
+          );
         }
       } else {
         // Error en la solicitud HTTP
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Error al conectar con el servidor"),
-        ));
+        _showDialog(
+          context,
+          'Error de Conexión',
+          'Error al conectar con el servidor.',
+        );
       }
     } catch (e) {
       // Si hay algún error con la conexión
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error de red: $e"),
-      ));
+      _showDialog(
+        context,
+        'Error de Red',
+        'Error de red: $e',
+      );
     }
+  }
+
+  // Función para mostrar AlertDialog
+  void _showDialog(BuildContext context, String title, String content) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cierra el diálogo
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -99,3 +125,51 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
+
+/*
+class AlertDialogExampleApp extends StatelessWidget {
+  const AlertDialogExampleApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+          colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('AlertDialog Sample')),
+        body: const Center(
+          child: DialogExample(),
+        ),
+      ),
+    );
+  }
+}
+
+class DialogExample extends StatelessWidget {
+  const DialogExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('AlertDialog Title'),
+          content: const Text('AlertDialog description'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+      child: const Text('Show Dialog'),
+    );
+  }
+}*/
