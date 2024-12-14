@@ -21,12 +21,12 @@ class Acciones extends StatefulWidget {
 }
 
 class _AccionesState extends State<Acciones> {
-  final String esp8266Ip =
-      'ws://127.0.0.1:55356/95S-Y3WwTco=/ws'; // Reemplazar a IP del ESP8266
+  final String apiUrl = 'http://localhost:3000/login';
+  // final String esp8266Ip =  'ws://127.0.0.1:55356/95S-Y3WwTco=/ws'; // Reemplazar a IP del ESP8266
   List<String> log = [];
 
   Future<void> _sendRequest(String action) async {
-    final url = '$esp8266Ip/door/$action';
+    final url = '$apiUrl/door/$action';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {

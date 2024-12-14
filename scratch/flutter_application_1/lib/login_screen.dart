@@ -14,8 +14,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   // URL del ESP8266
-  final String esp8266Ip =
-      'ws://127.0.0.1:54970'; // Reemplazar a IP del ESP8266
+  final String apiUrl = 'http://localhost:3000/login';
+  //final String esp8266Ip =  'ws://127.0.0.1:55356/95S-Y3WwTco=/ws'; // Reemplazar a IP del ESP8266
 
   // Función para hacer la solicitud POST
   Future<void> _login() async {
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(esp8266Ip),
+        Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "email": email,
@@ -125,51 +125,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-
-/*
-class AlertDialogExampleApp extends StatelessWidget {
-  const AlertDialogExampleApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('AlertDialog Sample')),
-        body: const Center(
-          child: DialogExample(),
-        ),
-      ),
-    );
-  }
-}
-
-class DialogExample extends StatelessWidget {
-  const DialogExample({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('AlertDialog Title'),
-          content: const Text('AlertDialog description'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'OK'),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
-      child: const Text('Show Dialog'),
-    );
-  }
-}*/
