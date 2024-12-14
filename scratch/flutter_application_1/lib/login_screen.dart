@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Runner/acciones_req.dart';
+import 'package:flutter_application_1/acciones_req.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
