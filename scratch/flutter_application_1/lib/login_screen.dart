@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // URL del ESP8266
   final String esp8266Ip =
-      'http://192.168.100.79'; // Reemplazar a IP del ESP8266
+      'ws://127.0.0.1:54970'; // Reemplazar a IP del ESP8266
 
   // Función para hacer la solicitud POST
   Future<void> _login() async {
