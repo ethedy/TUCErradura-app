@@ -62,7 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
             // Si es un usuario normal, redirigimos a la pantalla común
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AccionesUser()),
+              MaterialPageRoute(
+                  builder: (context) => AccionesUser(username: data['name'])),
             );
           } else {
             // Si el rol no es reconocido, mostramos un error
