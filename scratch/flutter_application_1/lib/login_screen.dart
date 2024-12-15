@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/acciones_req.dart';
+import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/screen_user.dart';
+import 'package:flutter_application_1/screen_admin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  // URL del ESP8266
-  final String apiUrl = 'http://localhost:3000/login';
-  //final String esp8266Ip =  'ws://127.0.0.1:55356/95S-Y3WwTco=/ws'; // Reemplazar a IP del ESP8266
 
   // Función para hacer la solicitud POST
   Future<void> _login() async {
@@ -24,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Verificamos que los campos no estén vacíos
     if (email.isEmpty || password.isEmpty) {
-      // Mostrar un AlertDialog si algún campo está vacío
       _showDialog(
         context,
         'Campos Vacíos',
@@ -32,6 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
+
+    // Obtener apiUrl desde el Provider
+    final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
 
     try {
       final response = await http.post(
@@ -44,16 +44,35 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Si la respuesta del ESP8266 es exitosa
         var data = json.decode(response.body);
         if (data["status"] == "success") {
-          // Si el login es exitoso, navegar a la siguiente pantalla
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Acciones()),
-          );
+          // Verificamos el rol del usuario
+          String role = data["role"];
+
+          // Si es administrador, redirigimos a la pantalla de administrador
+          if (role == Config.adminRole) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AccionesAdmin()), // Acciones para admin
+            );
+          } else if (role == Config.userRole) {
+            // Si es un usuario normal, redirigimos a la pantalla común
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      AccionesUser()), // Acciones para usuarios normales
+            );
+          } else {
+            // Si el rol no es reconocido, mostramos un error
+            _showDialog(
+              context,
+              'Rol Desconocido',
+              'El rol del usuario no es reconocido.',
+            );
+          }
         } else {
-          // Si las credenciales son incorrectas
           _showDialog(
             context,
             'Credenciales Incorrectas',
@@ -61,7 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else {
-        // Error en la solicitud HTTP
         _showDialog(
           context,
           'Error de Conexión',
@@ -69,7 +87,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      // Si hay algún error con la conexión
       _showDialog(
         context,
         'Error de Red',
