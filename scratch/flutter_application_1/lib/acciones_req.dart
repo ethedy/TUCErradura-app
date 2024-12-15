@@ -48,15 +48,12 @@ class _AccionesState extends State<Acciones> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              const SizedBox(width: 50),
               ElevatedButton(
                 onPressed: () => _sendRequest('open'),
                 child: const Text('ABRIR'),
               ),
               const SizedBox(width: 50),
-              ElevatedButton(
-                onPressed: () => _sendRequest('closed'),
-                child: const Text('CERRAR'),
-              ),
             ],
           ),
           Expanded(
