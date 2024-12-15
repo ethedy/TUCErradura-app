@@ -34,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
 
     try {
+      // Hacer la solicitud POST
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
@@ -45,24 +46,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        if (data["status"] == "success") {
-          // Verificamos el rol del usuario
-          String role = data["role"];
 
-          // Si es administrador, redirigimos a la pantalla de administrador
+        // Verifica si "status" y "role" están presentes en la respuesta
+        String status = data["status"] ?? '';
+        String role =
+            data["role"] ?? 'unknown'; // Asegura que 'role' nunca sea null
+
+        if (status == "success") {
           if (role == Config.adminRole) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) => AccionesAdmin()), // Acciones para admin
+              MaterialPageRoute(builder: (context) => AccionesAdmin()),
             );
           } else if (role == Config.userRole) {
             // Si es un usuario normal, redirigimos a la pantalla común
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      AccionesUser()), // Acciones para usuarios normales
+              MaterialPageRoute(builder: (context) => AccionesUser()),
             );
           } else {
             // Si el rol no es reconocido, mostramos un error
@@ -83,14 +83,16 @@ class _LoginScreenState extends State<LoginScreen> {
         _showDialog(
           context,
           'Error de Conexión',
-          'Error al conectar con el servidor.',
+          'Error al conectar con el servidor. Código de estado: ${response.statusCode}',
         );
       }
     } catch (e) {
+      // Mejora la impresión de los errores
+      print('Error de conexión: $e');
       _showDialog(
         context,
         'Error de Red',
-        'Error de red: $e',
+        'No se pudo conectar al servidor. Por favor, verifica tu conexión a internet. Detalles: $e',
       );
     }
   }
