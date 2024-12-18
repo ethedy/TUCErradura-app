@@ -56,7 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
           if (role == Config.adminRole) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AccionesAdmin()),
+              MaterialPageRoute(
+                  builder: (context) => AccionesAdmin(
+                        username: data['name'],
+                      )),
             );
           } else if (role == Config.userRole) {
             // Si es un usuario normal, redirigimos a la pantalla común
