@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/acciones_req.dart';
+import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/screen_user.dart';
+import 'package:flutter_application_1/screen_admin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -13,10 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // URL del ESP8266
-  final String esp8266Ip =
-      'http://192.168.100.79'; // Reemplazar a IP del ESP8266
-
   // Función para hacer la solicitud POST
   Future<void> _login() async {
     final String email = _emailController.text;
@@ -24,15 +24,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Verificamos que los campos no estén vacíos
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Por favor, ingresa todos los campos"),
-      ));
+      _showDialog(
+        context,
+        'Campos Vacíos',
+        'Por favor, ingresa todos los campos',
+      );
       return;
     }
 
+    // Obtener apiUrl desde el Provider
+    final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
+
     try {
       final response = await http.post(
-        Uri.parse(esp8266Ip),
+        Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "email": email,
@@ -43,37 +48,72 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         // Si la respuesta del ESP8266 es exitosa
         var data = json.decode(response.body);
-        if (data["status"] == "success") {
-          // Si el login es exitoso, navegar a la siguiente pantalla
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Acciones()),
-          );
+
+        // Verifica si "status" y "role" están presentes en la respuesta
+        String status = data["status"] ?? '';
+        String role =
+            data["role"] ?? 'unknown'; // Asegura que 'role' nunca sea null
+
+        if (status == "success") {
+          if (role == Config.adminRole) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AccionesAdmin(
+                        username: data['name'],
+                      )),
+            );
+          } else if (role == Config.userRole) {
+            // Si es un usuario normal, redirigimos a la pantalla común
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AccionesUser(username: data['name'])),
+            );
+          } else {
+            // Si el rol no es reconocido, mostramos un error
+            _showDialog(
+              context,
+              'Rol Desconocido',
+              'El rol del usuario no es reconocido.',
+            );
+          }
         } else {
-          // Si las credenciales son incorrectas
-          _showErrorDialog("Credenciales incorrectas");
+          _showDialog(
+            context,
+            'Credenciales Incorrectas',
+            'El correo electrónico o la contraseña son incorrectos.',
+          );
         }
       } else {
-        // Error en la solicitud HTTP
-        _showErrorDialog("Error al conectar con el servidor");
+        _showDialog(
+          context,
+          'Error de Conexión',
+          'Error al conectar con el servidor. Código de estado: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      // Si hay algún error con la conexión
-      _showErrorDialog("Error de red: $e");
+      // Mejora la impresión de los errores
+      print('Error de conexión: $e');
+      _showDialog(
+        context,
+        'Error de Red',
+        'No se pudo conectar al servidor. Por favor, verifica tu conexión a internet. Detalles: $e',
+      );
     }
   }
 
-  // Método para mostrar un AlertDialog con un mensaje de error
-  void _showErrorDialog(String message) {
-    showDialog(
+  // Función para mostrar AlertDialog
+  void _showDialog(BuildContext context, String title, String content) {
+    showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text('ERROR'),
-        content: Text(message),
+        title: Text(title),
+        content: Text(content),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context), // Cierra el diálogo
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -106,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 131, 9, 56),
+                    color: kPrimaryColor,
                   ),
                 ),
               ),
@@ -128,9 +168,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: true,
                     ),
                     SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _login,
-                      child: Text("Ingresar"),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _login,
+                          icon: Icon(Icons.check_circle_outline,
+                              size: 20, color: kPrimaryColor),
+                          label: Text('Ingresar'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
