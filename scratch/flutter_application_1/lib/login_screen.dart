@@ -120,30 +120,78 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(title: Text("Iniciar sesión")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Correo electrónico'),
-              keyboardType: TextInputType.emailAddress,
+      body: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          // Formulario y la imagen arriba del formulario
+          Column(
+            children: <Widget>[
+              // Imagen en la parte superior, encima del formulario
+              Container(
+                width: double.infinity,
+                height: size.height * 0.3, // Ajusta el tamaño de la imagen
+                child: Image.asset(
+                  'assets/images/Depto Electro.jpg',
+                ),
+              ),
+              // Título centrado entre la imagen y el formulario
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'Iniciar sesión',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Formulario de login
+
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextField(
+                      controller: _emailController,
+                      decoration:
+                          InputDecoration(labelText: 'Correo electrónico'),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(labelText: 'Contraseña'),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _login,
+                          icon: Icon(Icons.check_circle_outline,
+                              size: 20, color: Color.fromARGB(255, 131, 9, 56)),
+                          label: Text('Ingresar'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Imagen logo-IPS-UNR en la esquina inferior derecha
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Image.asset(
+              'assets/images/logo-IPS-UNR.png',
+              width: size.width * 0.3, // Ajusta el tamaño de la imagen
             ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Contraseña'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text("Ingresar"),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
