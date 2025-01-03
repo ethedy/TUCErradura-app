@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'package:http/http.dart' as http;
@@ -218,6 +219,7 @@ class _AccionesAdminState extends State<AccionesAdmin> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Menú de Administrador"),
@@ -245,86 +247,107 @@ class _AccionesAdminState extends State<AccionesAdmin> {
               ),
             ),
             ListTile(
-              title: Text('Ver Puertas'),
+              title: Text('Lista de Puertas Disponibles'),
+              leading: Icon(Icons.door_front_door),
               onTap: () {
-                _getDoors();
-                Navigator.pop(context);
+                // Navegar a la página de Puertas Disponibles
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PuertasDisponiblesPage(username: widget.username),
+                  ),
+                );
               },
             ),
             ListTile(
-              title: Text('Ver Usuarios'),
+              title: Text('Lista de Usuarios Verificados'),
+              leading: Icon(Icons.verified_user),
               onTap: () {
                 _getUsers();
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text('Agregar Usuario'),
+              title: Text('Agregar Usuarios'),
+              leading: Icon(Icons.supervised_user_circle),
               onTap: () {
                 _showAddUserDialog(); // Mostrar el formulario de agregar usuario
                 Navigator.pop(context);
               },
             ),
+            ListTile(
+              title: Text('Cerrar sesión'),
+              leading: Icon(Icons.exit_to_app),
+              onTap: () => _logout(context),
+            ),
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Center(
+      body: Stack(
+        // Usamos Stack para posicionar la imagen en la parte inferior derecha
+        children: <Widget>[
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                children: [
-                  const Text(
-                    'Hola',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    widget.username, // Nombre del usuario recibido
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: kPrimaryColor,
-                    ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Centrar los elementos
+                children: <Widget>[
+                  // Pantalla de bienvenida con el nombre del usuario
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Bienvenido al TUSE',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        widget.username, // Nombre del usuario recibido
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: kPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: size.height * 0.3,
+                        height:
+                            size.height * 0.3, // Ajusta el tamaño de la imagen
+                        child: Image.asset(
+                          'assets/images/administrador.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            // Mostrar las puertas disponibles
-            _isLoading
-                ? CircularProgressIndicator()
-                : Expanded(
-                    child: ListView.builder(
-                      itemCount: doors.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text('Puerta ${doors[index]}'),
-                          trailing: IconButton(
-                            icon: Icon(Icons.check_circle_outline),
-                            onPressed: () {
-                              _openDoor(doors[index]);
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-            // Mostrar los usuarios disponibles
-            Expanded(
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(users[index]),
-                  );
-                },
-              ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Image.asset(
+              'assets/images/logo-IPS-UNR.png',
+              width: size.width * 0.3, // Ajusta el tamaño de la imagen
             ),
-          ],
-        ),
+          ),
+          // Imagen en la parte inferior izquierda
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: Image.asset(
+              'assets/images/Depto Electro.jpg', // Nombre de la nueva imagen
+              width: size.width * 0.1, // Ajusta el tamaño de la imagen
+            ),
+          ),
+        ],
       ),
     );
   }

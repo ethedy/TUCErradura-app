@@ -184,7 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          // Imagen logo-IPS-UNR en la esquina inferior derecha
           Positioned(
             bottom: 16,
             right: 16,

@@ -53,7 +53,7 @@ class _AccionesUserState extends State<AccionesUser> {
               ),
             ),
             ListTile(
-              title: Text('Ver Puertas Disponibles'),
+              title: Text('Lista de Puertas Disponibles'),
               leading: Icon(Icons.door_front_door),
               onTap: () {
                 // Navegar a la página de Puertas Disponibles
@@ -74,47 +74,71 @@ class _AccionesUserState extends State<AccionesUser> {
           ],
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Centrar los elementos
-            children: <Widget>[
-              // Pantalla de bienvenida con el nombre del usuario
-              Column(
+      body: Stack(
+        // Usamos Stack para posicionar la imagen en la parte inferior derecha
+        children: <Widget>[
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Bienvenido al TUSE',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    widget.username, // Nombre del usuario recibido
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: kPrimaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    width: size.height * 0.3,
-                    height: size.height * 0.3, // Ajusta el tamaño de la imagen
-                    child: Image.asset(
-                      'assets/images/Usuario.jpg',
-                      fit: BoxFit.cover, // Asegura que la imagen se ajuste bien
-                    ),
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Centrar los elementos
+                children: <Widget>[
+                  // Pantalla de bienvenida con el nombre del usuario
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Bienvenido al TUSE',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        widget.username, // Nombre del usuario recibido
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: kPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: size.height * 0.3,
+                        height:
+                            size.height * 0.3, // Ajusta el tamaño de la imagen
+                        child: Image.asset(
+                          'assets/images/Usuario.jpg',
+                          fit: BoxFit
+                              .cover, // Asegura que la imagen se ajuste bien
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Image.asset(
+              'assets/images/logo-IPS-UNR.png',
+              width: size.width * 0.3, // Ajusta el tamaño de la imagen
+            ),
+          ),
+          // Imagen en la parte inferior izquierda
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: Image.asset(
+              'assets/images/Depto Electro.jpg', // Nombre de la nueva imagen
+              width: size.width * 0.1, // Ajusta el tamaño de la imagen
+            ),
+          ),
+        ],
       ),
     );
   }
