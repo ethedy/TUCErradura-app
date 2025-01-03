@@ -23,13 +23,13 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     });
 
     // Obtener la URL del API desde el Config
-    final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
-    final url = '$apiUrl/doors'; // URL para obtener las puertas
+    final apiUrl = Provider.of<Config>(context, listen: false)
+        .doorsEndpoint; // Usamos el endpoint de puertas
 
     try {
       // Hacemos un POST al servidor para obtener las puertas
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'action': 'get_doors', // Enviamos una acción como parámetro
@@ -92,9 +92,8 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
 
   // Función para abrir una puerta mediante la acción de GET
   Future<void> _openDoor(String doorName) async {
-    final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
-    final url =
-        '$apiUrl/door/open/$doorName'; // Acción para abrir la puerta específica
+    final apiUrl = Provider.of<Config>(context, listen: false).openDoorEndpoint;
+    final url = '$apiUrl/$doorName'; // Acción para abrir la puerta específica
 
     try {
       final response = await http.get(Uri.parse(url));

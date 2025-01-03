@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Config with ChangeNotifier {
   // URL de la API
-  String apiUrl = 'http://localhost:3000/login';
+  String apiUrl = 'http://localhost:3000';
 
   // Roles de usuario
   static const String adminRole = 'admin';
@@ -17,4 +17,11 @@ class Config with ChangeNotifier {
   // Método para obtener las puertas disponibles desde el servidor
   String get doorsEndpoint =>
       '$apiUrl/doors'; // Retorna la URL para las puertas
+
+  // Método para obtener el endpoint de abrir una puerta
+  String get openDoorEndpoint =>
+      '$apiUrl/door/open'; // Retorna el endpoint para abrir una puerta
+
+  // Método para obtener el endpoint de login
+  String get loginEndpoint => '$apiUrl/login'; // Retorna la URL para el login
 }
