@@ -24,4 +24,7 @@ class Config with ChangeNotifier {
 
   // Método para obtener el endpoint de login
   String get loginEndpoint => '$apiUrl/login'; // Retorna la URL para el login
+
+  // Método para obtener el endpoint de usuarios
+  String get usuariosEndpoint => '$apiUrl/users';
 }
