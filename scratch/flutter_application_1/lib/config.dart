@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Config with ChangeNotifier {
   // URL de la API
-  String apiUrl = 'http://localhost:3000/login';
+  String apiUrl = 'http://localhost:3000';
 
   // Roles de usuario
   static const String adminRole = 'admin';

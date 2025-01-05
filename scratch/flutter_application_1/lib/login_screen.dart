@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Obtener apiUrl desde el Provider
-    final apiUrl = Provider.of<Config>(context, listen: false).apiUrl;
+    final apiUrl = Provider.of<Config>(context, listen: false).loginEndpoint;
 
     try {
       final response = await http.post(
