@@ -13,4 +13,18 @@ class Config with ChangeNotifier {
     apiUrl = url;
     notifyListeners();
   }
+
+  // Método para obtener las puertas disponibles desde el servidor
+  String get doorsEndpoint =>
+      '$apiUrl/doors'; // Retorna la URL para las puertas
+
+  // Método para obtener el endpoint de abrir una puerta
+  String get openDoorEndpoint =>
+      '$apiUrl/door/open'; // Retorna el endpoint para abrir una puerta
+
+  // Método para obtener el endpoint de login
+  String get loginEndpoint => '$apiUrl/login'; // Retorna la URL para el login
+
+  // Método para obtener el endpoint de usuarios
+  String get usuariosEndpoint => '$apiUrl/users';
 }
