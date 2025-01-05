@@ -338,14 +338,35 @@ class _UsuariosPageState extends State<UsuariosPage> {
                   },
                 ),
               ),
-            // Botón centrado en la parte inferior
+            // Botones centrados en la parte inferior
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
-                child: ElevatedButton(
-                  onPressed: _showAddUserDialog,
-                  child: const Text('Agregar Usuario'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Botón para agregar usuario
+                    ElevatedButton(
+                      onPressed: _showAddUserDialog,
+                      child: const Text('Agregar Usuario'),
+                    ),
+                    const SizedBox(width: 10), // Espacio entre los botones
+                    // Botón para actualizar la lista de usuarios con un ícono
+                    ElevatedButton(
+                      onPressed: _fetchUsuarios,
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(), // Hace el botón circular
+                        padding:
+                            EdgeInsets.all(16), // Espacio interno para el ícono
+                      ),
+                      child: Icon(
+                        Icons.refresh, // Icono de refresco
+                        color: kPrimaryColor,
+                        size: 24,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
