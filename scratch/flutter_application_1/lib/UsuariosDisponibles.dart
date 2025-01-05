@@ -83,21 +83,19 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   // Función para eliminar un usuario
   Future<void> _deleteUser(String username) async {
-    final apiUrl = Provider.of<Config>(context, listen: false).usuariosEndpoint;
+    final apiUrl = Provider.of<Config>(context, listen: false).deleteUser;
+
+    // Asegúrate de que 'usuariosEndpoint' esté configurado como la URL de tu servidor
+    final url =
+        Uri.parse('$apiUrl/$username'); // Usamos el email del usuario en la URL
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'action': 'delete_user',
-          'username': username,
-        }),
-      );
+      // Realizamos la solicitud DELETE
+      final response = await http.delete(url);
 
       if (response.statusCode == 200) {
         setState(() {
-          usuarios.remove(username); // Eliminamos el usuario de la lista
+          usuarios.remove(username); // Eliminamos el usuario de la lista local
           selectedUsuarios.clear(); // Limpiamos la lista de selección
         });
         _showDialog('Éxito', 'El usuario $username ha sido eliminado.');
