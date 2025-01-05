@@ -20,13 +20,14 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   // Para el formulario de agregar usuario
   final _usernameController = TextEditingController();
-  String? selectedDay;
-  String? selectedTime;
-  String? selectedDoor;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  TimeOfDay? selectedTime;
 
   // Opciones de los formularios
   List<String> days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-  List<String> times = ['09:00', '12:00', '15:00', '18:00'];
+  String? selectedDay;
+  String? selectedDoor;
   List<String> doors = ['Puerta 1', 'Puerta 2', 'Puerta 3'];
 
   // Función para obtener la lista de usuarios desde la API
@@ -45,14 +46,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        print(
-            'Respuesta de la API: $data'); // Imprimir la respuesta para verificarla
 
         if (data['users'] != null) {
           setState(() {
             usuarios = List<String>.from(data['users']);
-            selectedUsuarios = List<bool>.filled(
-                usuarios.length, false); // Inicializamos el estado de selección
+            selectedUsuarios = List<bool>.filled(usuarios.length, false);
           });
         } else {
           _showDialog('Error', 'La respuesta de la API no contiene usuarios.');
@@ -71,115 +69,124 @@ class _UsuariosPageState extends State<UsuariosPage> {
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Desactivamos el indicador de carga
+        _isLoading = false;
       });
     }
   }
 
-  // Agregar un nuevo usuario
-  void _addUser() {
+// Función para agregar un nuevo usuario
+  Future<void> _addUser() async {
+    final apiUrl = Provider.of<Config>(context, listen: false)
+        .addUserEndpoint; // La URL del endpoint para agregar un usuario
+
+    // Asegúrate de que la URL esté configurada correctamente en tu configuración
+    final url = Uri.parse(apiUrl); // URL para la solicitud POST al servidor
+
+    // Verificamos que los campos no estén vacíos
     if (_usernameController.text.isNotEmpty &&
-        selectedDay != null &&
-        selectedTime != null &&
+        _emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        selectedDay != null && // Verificamos que el día esté seleccionado
+        selectedTime != null && // Verificamos que la hora esté seleccionada
         selectedDoor != null) {
-      setState(() {
-        usuarios
-            .add(_usernameController.text); // Agregamos el usuario a la lista
-      });
-      Navigator.pop(context); // Cerramos el diálogo
-      _showDialog('Éxito', 'Usuario agregado correctamente');
+      // Verificamos que la puerta esté seleccionada) {
+      // Creamos el objeto de usuario para enviar en la solicitud
+      var newUser = {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+        'role': 'user', // Puedes ajustar el rol según tus necesidades
+        'name': _usernameController.text,
+        'day': selectedDay, // El día seleccionado
+        'time': selectedTime
+            .toString(), // La hora seleccionada (puedes formatearla como necesites)
+        'door': selectedDoor, // La puerta seleccionada
+      };
+
+      try {
+        // Realizamos la solicitud POST
+        final response = await http.post(
+          url,
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(newUser), // Convertimos el objeto a JSON
+        );
+
+        if (response.statusCode == 201) {
+          // Si la solicitud fue exitosa, actualizamos el estado de la interfaz
+          setState(() {
+            usuarios.add(_usernameController
+                .text); // Agregamos el usuario a la lista local
+          });
+
+          _showDialog('Usuario Creado',
+              'El usuario ${_usernameController.text} ha sido creado exitosamente.');
+        } else {
+          // Si hubo un error, mostramos el mensaje
+          var errorResponse = jsonDecode(response.body);
+          _showDialog('Error',
+              errorResponse['message'] ?? 'No se pudo crear el usuario.');
+        }
+      } catch (e) {
+        // Manejo de errores en la conexión con el servidor
+        _showDialog(
+            'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+      }
     } else {
+      // Si los campos están vacíos, mostramos un mensaje de error
       _showDialog('Error', 'Por favor complete todos los campos.');
     }
   }
 
-  // Función para mostrar un AlertDialog
-  void _showDialog(String title, String content) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Cierra el diálogo
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Mostrar el formulario para agregar un usuario
-  void _showAddUserDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Agregar Usuario'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _usernameController,
-                decoration:
-                    const InputDecoration(labelText: 'Nombre de usuario'),
-              ),
-              _buildDropdown('día', selectedDay, days, (newValue) {
-                setState(() {
-                  selectedDay = newValue;
-                });
-              }),
-              _buildDropdown('horario', selectedTime, times, (newValue) {
-                setState(() {
-                  selectedTime = newValue;
-                });
-              }),
-              _buildDropdown('puerta', selectedDoor, doors, (newValue) {
-                setState(() {
-                  selectedDoor = newValue;
-                });
-              }),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () =>
-                  Navigator.pop(context), // Cerrar el diálogo sin agregar
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: _addUser, // Llamar la función para agregar el usuario
-              child: const Text('Agregar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Función para eliminar un usuario
-  Future<void> _deleteUser(String username) async {
+  // Guardar el usuario en el servidor
+  Future<void> _saveUserToServer() async {
     final apiUrl = Provider.of<Config>(context, listen: false).usuariosEndpoint;
-
-    // Confirmación de eliminación
-    bool? confirmDelete = await _confirmDelete(username);
-    if (confirmDelete != true)
-      return; // Si no se confirma, salimos de la función
+    final newUser = {
+      'username': _usernameController.text,
+      'email': _emailController.text,
+      'password': _passwordController.text,
+      'day': selectedDay,
+      'time': selectedTime?.format(context),
+      'door': selectedDoor
+    };
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'action': 'delete_user',
-          'username': username,
-        }),
+        body: json.encode(newUser),
       );
 
       if (response.statusCode == 200) {
+        _showDialog('Éxito', 'Usuario agregado correctamente.');
+      } else {
+        _showDialog('Error', 'No se pudo agregar el usuario.');
+      }
+    } catch (e) {
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    }
+  }
+
+  // Función para eliminar un usuario
+  Future<void> _deleteUser(String username) async {
+    final apiUrl = Provider.of<Config>(context, listen: false).deleteUser;
+
+    // Asegúrate de que 'usuariosEndpoint' esté configurado como la URL de tu servidor
+    final url =
+        Uri.parse('$apiUrl/$username'); // Usamos el email del usuario en la URL
+
+    // Confirmación de eliminación
+    bool? confirmDelete = await _confirmDelete(username);
+    if (confirmDelete != true) return;
+
+    try {
+      // Realizamos la solicitud DELETE
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
         setState(() {
-          usuarios.remove(username); // Eliminamos el usuario de la lista
+          usuarios.remove(username); // Eliminamos el usuario de la lista local
           selectedUsuarios.clear(); // Limpiamos la lista de selección
         });
         _showDialog('Éxito', 'El usuario $username ha sido eliminado.');
@@ -215,13 +222,78 @@ class _UsuariosPageState extends State<UsuariosPage> {
     );
   }
 
+  // Función para mostrar un AlertDialog
+  void _showDialog(String title, String content) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cierra el diálogo
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Mostrar el formulario para agregar un usuario
+  void _showAddUserDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Agregar Usuario'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _usernameController,
+                decoration:
+                    const InputDecoration(labelText: 'Nombre de usuario'),
+              ),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true,
+              ),
+              _buildDropdown('día', selectedDay, days, (newValue) {
+                setState(() {
+                  selectedDay = newValue;
+                });
+              }),
+              _buildTimePicker(),
+              _buildDropdown('puerta', selectedDoor, doors, (newValue) {
+                setState(() {
+                  selectedDoor = newValue;
+                });
+              }),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: _addUser,
+              child: const Text('Agregar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Widget para los Dropdowns de selección
-  Widget _buildDropdown<T>(
-    String label,
-    String? selectedValue,
-    List<String> options,
-    Function(String?) onChanged,
-  ) {
+  Widget _buildDropdown<T>(String label, String? selectedValue,
+      List<String> options, Function(String?) onChanged) {
     return DropdownButton<String>(
       value: selectedValue,
       hint: Text('Selecciona $label'),
@@ -234,6 +306,24 @@ class _UsuariosPageState extends State<UsuariosPage> {
           child: Text(option),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildTimePicker() {
+    return ListTile(
+      title: Text('Selecciona Horario'),
+      subtitle: Text(selectedTime?.format(context) ?? 'Selecciona un horario'),
+      onTap: () async {
+        final TimeOfDay? time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
+        if (time != null) {
+          setState(() {
+            selectedTime = time;
+          });
+        }
+      },
     );
   }
 
@@ -252,88 +342,23 @@ class _UsuariosPageState extends State<UsuariosPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start, // Alineamos todo a la izquierda
           children: <Widget>[
-            if (_isLoading)
-              const Center(child: CircularProgressIndicator())
-            else if (usuarios.isEmpty)
-              const Center(child: Text('No hay usuarios disponibles.'))
-            else
+            if (_isLoading) const Center(child: CircularProgressIndicator()),
+            if (usuarios.isEmpty)
+              const Center(child: Text('No hay usuarios disponibles.')),
+            if (usuarios.isNotEmpty)
               Expanded(
                 child: ListView.builder(
                   itemCount: usuarios.length,
                   itemBuilder: (context, index) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .start, // Alineamos a la izquierda cada fila
-                      children: <Widget>[
-                        // Nombre del usuario
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedUsuarios[index] =
-                                  !selectedUsuarios[index];
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 15.0),
-                              child: Text(
-                                usuarios[index],
-                                textAlign: TextAlign
-                                    .left, // Alineamos el texto a la izquierda
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: kPrimaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Mostrar opciones de eliminar si el usuario está seleccionado
-                        if (selectedUsuarios[index])
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                // Botón rojo para borrar
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                    size: 30,
-                                  ),
-                                  onPressed: () {
-                                    _deleteUser(usuarios[index]);
-                                  },
-                                ),
-                                // Palomita para confirmar eliminación
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.green,
-                                    size: 30,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      selectedUsuarios[index] =
-                                          false; // Deselecciona el usuario
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
+                    return ListTile(
+                      title: Text(usuarios[index]),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          _deleteUser(usuarios[index]);
+                        },
+                      ),
                     );
                   },
                 ),

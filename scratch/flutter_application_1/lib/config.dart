@@ -27,4 +27,10 @@ class Config with ChangeNotifier {
 
   // Método para obtener el endpoint de usuarios
   String get usuariosEndpoint => '$apiUrl/users';
+
+  // Método para obtener el endpoint de usuarios
+  String get addUserEndpoint => '$apiUrl/AddUser';
+
+  //Mètodo para eliminar usuario
+  String get deleteUser => '$apiUrl/DeleteUser';
 }
