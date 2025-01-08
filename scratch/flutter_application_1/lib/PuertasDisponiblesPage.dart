@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,7 +20,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
   // Función para obtener las puertas disponibles desde la API
   Future<void> _fetchDoors() async {
     setState(() {
-      _isLoading = true;
+      _isLoading = true; // Activamos el indicador de carga
     });
 
     // Obtener la URL del API desde el Config
@@ -114,7 +115,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Puertas Disponibles'),
+        title: const Text('Puertas Disponibles'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -139,7 +140,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.grey[300], // Fondo gris claro
+                                color: kPrimaryLightColor, // Fondo gris claro
                                 borderRadius: BorderRadius.circular(
                                     20.0), // Bordes circulares
                               ),
@@ -151,7 +152,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                                  color: kPrimaryColor,
                                 ),
                               ),
                             ),

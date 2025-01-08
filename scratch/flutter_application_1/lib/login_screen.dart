@@ -5,9 +5,11 @@ import 'package:flutter_application_1/screen_admin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
+  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
@@ -31,12 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Obtener apiUrl desde el Provider
-    final loginUrl = Provider.of<Config>(context, listen: false).loginEndpoint;
+    final apiUrl = Provider.of<Config>(context, listen: false).loginEndpoint;
 
     try {
-      // Hacer la solicitud POST
       final response = await http.post(
-        Uri.parse(loginUrl),
+        Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           "email": email,
@@ -45,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
+        // Si la respuesta del ESP8266 es exitosa
         var data = json.decode(response.body);
 
         // Verifica si "status" y "role" están presentes en la respuesta
@@ -144,11 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: kPrimaryColor,
                   ),
                 ),
               ),
               // Formulario de login
-
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -172,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ElevatedButton.icon(
                           onPressed: _login,
                           icon: Icon(Icons.check_circle_outline,
-                              size: 20, color: Color.fromARGB(255, 131, 9, 56)),
+                              size: 20, color: kPrimaryColor),
                           label: Text('Ingresar'),
                         ),
                       ],
@@ -182,7 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          // Imagen logo-IPS-UNR en la esquina inferior derecha
           Positioned(
             bottom: 16,
             right: 16,
