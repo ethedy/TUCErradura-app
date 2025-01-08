@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'package:flutter_application_1/constants.dart';
+import 'package:flutter_application_1/modificarcontrase%C3%B1a.dart';
 
 class AccionesUser extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -62,6 +63,18 @@ class _AccionesUserState extends State<AccionesUser> {
                   MaterialPageRoute(
                     builder: (context) =>
                         PuertasDisponiblesPage(username: widget.username),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Ajustes'),
+              leading: Icon(Icons.security_rounded),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangePasswordScreen(),
                   ),
                 );
               },

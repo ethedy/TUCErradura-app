@@ -33,4 +33,7 @@ class Config with ChangeNotifier {
 
   // Método para obtener el endpoint de usuarios
   String get addUserEndpoint => '$apiUrl/AddUser';
+
+  //Mètodo para cambiar contraseña
+  String get modifyPassword => '$apiUrl/changePassword';
 }
