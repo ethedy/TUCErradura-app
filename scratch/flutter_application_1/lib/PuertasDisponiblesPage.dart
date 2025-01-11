@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/HttpService.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class PuertasDisponiblesPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -23,19 +23,23 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       _isLoading = true; // Activamos el indicador de carga
     });
 
+    // Obtener el token de autenticación desde el Config
+    final token = Provider.of<Config>(context, listen: false).authToken;
+
+    if (token == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+
     // Obtener la URL del API desde el Config
-    final apiUrl = Provider.of<Config>(context, listen: false)
-        .doorsEndpoint; // Usamos el endpoint de puertas
+    final apiUrl = Provider.of<Config>(context, listen: false).doorsEndpoint;
 
     try {
-      // Hacemos un POST al servidor para obtener las puertas
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'action': 'get_doors', // Enviamos una acción como parámetro
-        }),
-      );
+      // Usamos el HttpService para hacer la solicitud GET
+      final response = await HttpService().getRequest(apiUrl, token);
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -93,11 +97,26 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
 
   // Función para abrir una puerta mediante la acción de GET
   Future<void> _openDoor(String doorName) async {
+    setState(() {
+      _isLoading = true; // Activamos el indicador de carga
+    });
+    // Obtener el token de autenticación desde el Config
+    final token = Provider.of<Config>(context, listen: false).authToken;
+
+    if (token == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+    // Obtener la URL del API desde el Config
     final apiUrl = Provider.of<Config>(context, listen: false).openDoorEndpoint;
     final url = '$apiUrl/$doorName'; // Acción para abrir la puerta específica
 
     try {
-      final response = await http.get(Uri.parse(url));
+      // Usamos el HttpService para hacer la solicitud GET
+      final response = await HttpService().getRequest(url, token);
 
       if (response.statusCode == 200) {
         _showDialog(
@@ -108,6 +127,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     } catch (e) {
       _showDialog(
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    } finally {
+      setState(() {
+        _isLoading = false; // Desactivamos el indicador de carga
+      });
     }
   }
 

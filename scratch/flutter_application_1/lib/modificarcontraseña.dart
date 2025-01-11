@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/config.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:provider/provider.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -20,31 +18,44 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   // Función para enviar el cambio de contraseña
   Future<void> _changePassword() async {
-    // Obtener el apiUrl desde el Provider
-    final apiUrl = Provider.of<Config>(context, listen: false).modifyPassword;
+    final config = Provider.of<Config>(context, listen: false);
 
+    // Obtener el token y URL desde el provider de Config
+    final token = config.authToken;
+    final apiUrl = config.modifyPassword;
+
+    // Validar que el formulario esté correcto
     if (_formKey.currentState?.validate() ?? false) {
       final currentPassword = _currentPasswordController.text;
       final newPassword = _newPasswordController.text;
 
+      if (token == null) {
+        setState(() {
+          _errorMessage = 'No se encontró el token de autenticación';
+        });
+        return;
+      }
+
+      // Construir el cuerpo de la solicitud
+      final requestData = {
+        "current_password": currentPassword,
+        "new_password": newPassword,
+      };
+
       try {
-        final response = await http.post(
-          Uri.parse(apiUrl),
-          headers: {"Content-Type": "application/json"},
-          body: json.encode({
-            "current_password": currentPassword,
-            "new_password": newPassword,
-          }),
-        );
+        // Usar HttpService para enviar la solicitud POST
+        final response = await config.postRequest(apiUrl, requestData);
 
         if (response.statusCode == 200) {
-          // Si la respuesta es exitosa, puedes mostrar un mensaje de éxito o navegar a otra pantalla
+          // Si la respuesta es exitosa, mostrar un mensaje de éxito
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Contraseña cambiada exitosamente')),
           );
         } else {
+          // Si hay un error con el servidor
           setState(() {
-            _errorMessage = 'Error al cambiar la contraseña';
+            _errorMessage =
+                'Error al cambiar la contraseña. Código: ${response.statusCode}';
           });
         }
       } catch (e) {

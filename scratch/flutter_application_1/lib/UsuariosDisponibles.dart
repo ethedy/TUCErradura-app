@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/HttpService.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +31,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
   String? selectedDoor;
   List<String> doors = ['Puerta 1', 'Puerta 2', 'Puerta 3'];
 
-  // Función para obtener la lista de usuarios desde la API
+  // Función para obtener la lista de usuarios desde la API usando HttpService
   Future<void> _fetchUsuarios() async {
     setState(() {
       _isLoading = true;
@@ -39,10 +40,18 @@ class _UsuariosPageState extends State<UsuariosPage> {
     // Obtener la URL del API desde el Config
     final apiUrl = Provider.of<Config>(context, listen: false)
         .usuariosEndpoint; // Usamos el endpoint de usuarios
+    final token = Provider.of<Config>(context, listen: false).authToken;
+    if (token == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
 
     try {
       // Hacemos un GET al servidor para obtener los usuarios
-      final response = await http.get(Uri.parse(apiUrl));
+      final response = await HttpService().getRequest(apiUrl, token);
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -78,6 +87,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
   Future<void> _addUser() async {
     final apiUrl = Provider.of<Config>(context, listen: false)
         .addUserEndpoint; // La URL del endpoint para agregar un usuario
+    final token = Provider.of<Config>(context, listen: false).authToken;
+
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
 
     // Asegúrate de que la URL esté configurada correctamente en tu configuración
     final url = Uri.parse(apiUrl); // URL para la solicitud POST al servidor
@@ -104,13 +119,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
       try {
         // Realizamos la solicitud POST
-        final response = await http.post(
-          url,
-          headers: <String, String>{
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode(newUser), // Convertimos el objeto a JSON
-        );
+        final response = await HttpService().postRequest(url, newUser, token);
 
         if (response.statusCode == 201) {
           // Si la solicitud fue exitosa, actualizamos el estado de la interfaz
@@ -141,6 +150,14 @@ class _UsuariosPageState extends State<UsuariosPage> {
   // Guardar el usuario en el servidor
   Future<void> _saveUserToServer() async {
     final apiUrl = Provider.of<Config>(context, listen: false).usuariosEndpoint;
+    final token = Provider.of<Config>(context, listen: false)
+        .authToken; // Obtener el token de autenticación
+
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+
     final newUser = {
       'username': _usernameController.text,
       'email': _emailController.text,
@@ -151,11 +168,8 @@ class _UsuariosPageState extends State<UsuariosPage> {
     };
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(newUser),
-      );
+      final response =
+          await HttpService().postRequest(Uri.parse(apiUrl), newUser, token);
 
       if (response.statusCode == 200) {
         _showDialog('Éxito', 'Usuario agregado correctamente.');
@@ -171,6 +185,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
   // Función para eliminar un usuario
   Future<void> _deleteUser(String username) async {
     final apiUrl = Provider.of<Config>(context, listen: false).deleteUser;
+    final token = Provider.of<Config>(context, listen: false).authToken;
+
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
 
     // Asegúrate de que 'usuariosEndpoint' esté configurado como la URL de tu servidor
     final url =
@@ -179,10 +199,13 @@ class _UsuariosPageState extends State<UsuariosPage> {
     // Confirmación de eliminación
     bool? confirmDelete = await _confirmDelete(username);
     if (confirmDelete != true) return;
-
+    // Cambiar el estado para mostrar el cargador
+    setState(() {
+      _isLoading = true;
+    });
     try {
-      // Realizamos la solicitud DELETE
-      final response = await http.delete(url);
+      // Realizamos la solicitud DELETE a través de HttpService
+      final response = await HttpService().deleteRequest(url.toString(), token);
 
       if (response.statusCode == 200) {
         setState(() {
@@ -196,6 +219,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
     } catch (e) {
       _showDialog(
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    } finally {
+      // Desactivar el cargador cuando la operación termine
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
