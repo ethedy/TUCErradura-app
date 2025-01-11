@@ -23,8 +23,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       _isLoading = true; // Activamos el indicador de carga
     });
 
-    // Obtener el token de autenticación desde el Config
-    final token = Provider.of<Config>(context, listen: false).authToken;
+    // Obtener el token de autenticación y la URL del API desde el Config
+    final config = Provider.of<Config>(context, listen: false);
+    final token = config.authToken;
+    final apiUrl = config.doorsEndpoint;
 
     if (token == null) {
       setState(() {
@@ -34,24 +36,29 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       return;
     }
 
-    // Obtener la URL del API desde el Config
-    final apiUrl = Provider.of<Config>(context, listen: false).doorsEndpoint;
-
     try {
-      // Usamos el HttpService para hacer la solicitud GET
-      final response = await HttpService().getRequest(apiUrl, token);
+      // Usamos el HttpService para hacer la solicitud
+      final response = await HttpService().postRequest(
+        Uri.parse(apiUrl), // Convertimos apiUrl a Uri
+        {'action': 'get_doors'}, // Este cuerpo es necesario en un POST
+        token,
+      );
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         print(
             'Respuesta de la API: $data'); // Imprimir la respuesta para verificarla
 
-        if (data['doors'] != null) {
+        // Acceder correctamente a la respuesta, asumiendo que está en 'data' -> 'doors'
+        if (data['data'] != null && data['data']['doors'] != null) {
+          //Verifica que la estructura de la respuesta de la API coincida con cómo estás tratando de acceder
+          // a ella en el código (posiblemente debas acceder a data['data']['doors'] en lugar de solo data['doors']).
           setState(() {
-            puertasDisponibles = List<String>.from(data['doors']);
+            puertasDisponibles = List<String>.from(data['data']['doors']);
           });
         } else {
-          _showDialog('Error', 'La respuesta de la API no contiene puertas.');
+          _showDialog('Error',
+              'La respuesta de la API no contiene las puertas esperadas.');
         }
       } else {
         setState(() {
@@ -60,11 +67,11 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         _showDialog('Error', 'No se pudo obtener las puertas disponibles.');
       }
     } catch (e) {
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
       setState(() {
         puertasDisponibles = [];
       });
-      _showDialog(
-          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
     } finally {
       setState(() {
         _isLoading = false; // Desactivamos el indicador de carga
@@ -92,7 +99,12 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
   @override
   void initState() {
     super.initState();
-    _fetchDoors(); // Llamamos a la función para obtener las puertas disponibles cuando se inicie la página
+    final token = Provider.of<Config>(context, listen: false).authToken;
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+    } else {
+      _fetchDoors(); // Solo llamamos si el token está disponible
+    }
   }
 
   // Función para abrir una puerta mediante la acción de GET
@@ -193,7 +205,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                                   color: Colors.green,
                                 ),
                           onPressed: _isLoading
-                              ? null
+                              ? null // Desactivamos el botón mientras está cargando
                               : () => _openDoor(puertasDisponibles[index]),
                         ),
                       ],

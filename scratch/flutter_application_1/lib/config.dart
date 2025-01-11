@@ -22,6 +22,12 @@ class Config with ChangeNotifier {
   // Método para obtener el token
   String? get authToken => _authToken;
 
+  // Método para borrar el token
+  void clearAuthToken() {
+    _authToken = null;
+    notifyListeners(); // Notifica a los oyentes para que actualicen la UI
+  }
+
   // Método para cambiar la URL de la API y notificar a los widgets
   void setApiUrl(String url) {
     apiUrl = url;

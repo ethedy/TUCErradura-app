@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
+import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:flutter_application_1/modificarcontrase%C3%B1a.dart';
+import 'package:provider/provider.dart';
 
 class AccionesUser extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -15,7 +17,10 @@ class AccionesUser extends StatefulWidget {
 class _AccionesUserState extends State<AccionesUser> {
   // Función para cerrar sesión y regresar a la pantalla de login
   void _logout(BuildContext context) {
-    // Aquí podrías limpiar cualquier dato de sesión si es necesario
+    // Limpiar el token de autenticación
+    final config = Provider.of<Config>(context, listen: false);
+    config.clearAuthToken(); // Limpiar el token al desloguearse
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

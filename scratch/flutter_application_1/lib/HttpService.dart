@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 //Pondremos el token en el header Authorization con el prefijo Bearer para que la API lo reconozca como un token de acceso
 class HttpService {
-  // Función para realizar una solicitud GET con token
+// Función para realizar una solicitud GET con token
   Future<http.Response> getRequest(String url, String? token) async {
     if (token == null) {
       throw Exception(
@@ -11,19 +13,32 @@ class HttpService {
     }
 
     try {
-      // Se añaden los headers con el token de autorización
+      // Realizamos la solicitud GET con los headers necesarios
       final response = await http.get(
         Uri.parse(url),
         headers: _buildHeaders(token),
       );
+
       // Comprobamos si la respuesta fue exitosa
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        return response;
+      } else if (response.statusCode == 401) {
+        throw Exception('Token inválido o expirado');
+      } else if (response.statusCode == 403) {
+        throw Exception('Acceso prohibido');
+      } else {
         throw Exception(
             'Error en GET. Código de estado: ${response.statusCode}');
       }
-      return response;
     } catch (e) {
-      throw Exception('Error de conexión o de servidor: $e');
+      // Manejo de errores más detallado
+      if (e is SocketException) {
+        throw Exception('Error de conexión: $e');
+      } else if (e is TimeoutException) {
+        throw Exception('Tiempo de espera agotado: $e');
+      } else {
+        throw Exception('Error desconocido: $e');
+      }
     }
   }
 
