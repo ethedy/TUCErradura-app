@@ -150,41 +150,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
     }
   }
 
-  // Guardar el usuario en el servidor
-  Future<void> _saveUserToServer() async {
-    final config = Provider.of<Config>(context, listen: false);
-    final apiUrl = config.usuariosEndpoint;
-    final token = await config.authToken;
-
-    if (token == null) {
-      _showDialog('Error', 'No se encontró el token de autenticación.');
-      return;
-    }
-
-    final newUser = {
-      'username': _usernameController.text,
-      'email': _emailController.text,
-      'password': _passwordController.text,
-      'day': selectedDay,
-      'time': selectedTime?.format(context),
-      'door': selectedDoor
-    };
-
-    try {
-      final response =
-          await HttpService().postRequest(Uri.parse(apiUrl), newUser, token);
-
-      if (response.statusCode == 200) {
-        _showDialog('Éxito', 'Usuario agregado correctamente.');
-      } else {
-        _showDialog('Error', 'No se pudo agregar el usuario.');
-      }
-    } catch (e) {
-      _showDialog(
-          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
-    }
-  }
-
   // Función para eliminar un usuario
   Future<void> _deleteUser(String username) async {
     final config = Provider.of<Config>(context, listen: false);
