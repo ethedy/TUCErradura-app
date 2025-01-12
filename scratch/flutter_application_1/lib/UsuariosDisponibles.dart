@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
+import 'package:flutter_application_1/EditUserPage.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -138,36 +139,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
     }
   }
 
-  // Guardar el usuario en el servidor
-  Future<void> _saveUserToServer() async {
-    final apiUrl = Provider.of<Config>(context, listen: false).usuariosEndpoint;
-    final newUser = {
-      'username': _usernameController.text,
-      'email': _emailController.text,
-      'password': _passwordController.text,
-      'day': selectedDay,
-      'time': selectedTime?.format(context),
-      'door': selectedDoor
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(newUser),
-      );
-
-      if (response.statusCode == 200) {
-        _showDialog('Éxito', 'Usuario agregado correctamente.');
-      } else {
-        _showDialog('Error', 'No se pudo agregar el usuario.');
-      }
-    } catch (e) {
-      _showDialog(
-          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
-    }
-  }
-
   // Función para eliminar un usuario
   Future<void> _deleteUser(String username) async {
     final apiUrl = Provider.of<Config>(context, listen: false).deleteUser;
@@ -263,6 +234,35 @@ class _UsuariosPageState extends State<UsuariosPage> {
                 decoration: const InputDecoration(labelText: 'Contraseña'),
                 obscureText: true,
               ),
+              // Botón "Siguiente", solo habilitado cuando los campos están completos
+              ElevatedButton(
+                onPressed: (_usernameController.text.isNotEmpty &&
+                        _emailController.text.isNotEmpty &&
+                        _passwordController.text.isNotEmpty)
+                    ? () {
+                        Navigator.pop(context); // Cierra la ventana actual
+                        _showSecondStepDialog(); // Abre la siguiente ventana emergente
+                      }
+                    : null, // Deshabilitado si los campos no están completos
+                child: const Text('Siguiente'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Segunda ventana emergente para ingresar el día, horario y puerta
+  void _showSecondStepDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Detalles del Usuario'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               _buildDropdown('día', selectedDay, days, (newValue) {
                 setState(() {
                   selectedDay = newValue;
@@ -278,11 +278,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context), // Cierra la ventana
               child: const Text('Cancelar'),
             ),
             TextButton(
-              onPressed: _addUser,
+              onPressed: _addUser, // Llama a la función para agregar el usuario
               child: const Text('Agregar'),
             ),
           ],
@@ -353,11 +353,32 @@ class _UsuariosPageState extends State<UsuariosPage> {
                   itemBuilder: (context, index) {
                     return ListTile(
                       title: Text(usuarios[index]),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          _deleteUser(usuarios[index]);
-                        },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Botón para eliminar usuario
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              _deleteUser(usuarios[index]);
+                            },
+                          ),
+                          // Botón para editar usuario
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              // Solo pasamos el username, el resto de los datos se solicitarán en EditUserPage
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditUserPage(
+                                    username: usuarios[index],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -399,5 +420,36 @@ class _UsuariosPageState extends State<UsuariosPage> {
         ),
       ),
     );
+  }
+
+// Función para actualizar el usuario
+  Future<void> _updateUser(String username) async {
+    final apiUrl = Provider.of<Config>(context, listen: false).addUserEndpoint;
+    final updatedUser = {
+      'username': _usernameController.text,
+      'email': _emailController.text,
+      'password': _passwordController.text,
+      'day': selectedDay,
+      'time': selectedTime?.format(context),
+      'door': selectedDoor,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(updatedUser),
+      );
+
+      if (response.statusCode == 200) {
+        _showDialog('Éxito', 'Usuario actualizado correctamente.');
+        _fetchUsuarios(); // Recargar la lista de usuarios
+      } else {
+        _showDialog('Error', 'No se pudo actualizar el usuario.');
+      }
+    } catch (e) {
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    }
   }
 }
