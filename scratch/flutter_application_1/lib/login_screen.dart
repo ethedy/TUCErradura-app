@@ -57,8 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
             data["token"]; // Suponemos que el token está en la respuesta
 
         if (status == "success") {
-          // Guardamos el token en el provider
-          Provider.of<Config>(context, listen: false).setAuthToken(token);
+          // Guardamos el token y el rol en el provider
+          await Provider.of<Config>(context, listen: false)
+              .setAuthToken(token, role);
 
           // Redirigir al usuario según su rol
           if (role == Config.adminRole) {

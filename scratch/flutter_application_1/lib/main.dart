@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/screens.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => Config(),
+    MultiProvider(
+      // Usamos MultiProvider para manejar varios proveedores
+      providers: [
+        ChangeNotifierProvider(create: (context) => Config()),
+        ChangeNotifierProvider(
+            create: (context) =>
+                SessionManager()), // Añadir SessionManager como proveedor
+      ],
       child: MyApp(),
     ),
   );

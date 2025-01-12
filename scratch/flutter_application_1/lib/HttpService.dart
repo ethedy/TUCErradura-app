@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
+//HttpService se usa para realizar solicitudes HTTP (GET, POST, DELETE) según lo que se necesite.
+//La responsabilidad de HttpService es hacer las solicitudes y manejar los errores asociados a esas solicitudes, no gestionar la configuración directamente.
+
 //Pondremos el token en el header Authorization con el prefijo Bearer para que la API lo reconozca como un token de acceso
 class HttpService {
 // Función para realizar una solicitud GET con token

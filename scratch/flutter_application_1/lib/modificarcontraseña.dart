@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:provider/provider.dart';
 
@@ -68,6 +69,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener el SessionManager y Config
+    final sessionManager = Provider.of<SessionManager>(context, listen: false);
+    final config = Provider.of<Config>(context, listen: false);
+
+    // Registrar el contexto de la pantalla actual
+    sessionManager.setContext(context);
+
+    // Verificar si la sesión ha expirado
+    sessionManager.checkSessionExpiration(config);
     return Scaffold(
       appBar: AppBar(
         title: Text('Cambiar Contraseña'),

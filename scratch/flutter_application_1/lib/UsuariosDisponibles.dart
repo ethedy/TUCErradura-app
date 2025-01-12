@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HttpService.dart';
+import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class UsuariosPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -37,10 +37,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
       _isLoading = true;
     });
 
-    // Obtener la URL del API desde el Config
-    final apiUrl = Provider.of<Config>(context, listen: false)
-        .usuariosEndpoint; // Usamos el endpoint de usuarios
-    final token = Provider.of<Config>(context, listen: false).authToken;
+    // Obtener la URL del API y el token desde el Config
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl = config.usuariosEndpoint; // Usamos el endpoint de usuarios
+    final token =
+        await config.authToken; // Obtenemos el token de forma asíncrona
+
     if (token == null) {
       setState(() {
         _isLoading = false;
@@ -85,9 +87,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
 // Función para agregar un nuevo usuario
   Future<void> _addUser() async {
-    final apiUrl = Provider.of<Config>(context, listen: false)
-        .addUserEndpoint; // La URL del endpoint para agregar un usuario
-    final token = Provider.of<Config>(context, listen: false).authToken;
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl =
+        config.addUserEndpoint; // La URL del endpoint para agregar un usuario
+    final token = await config.authToken; // Obtener el token de forma asíncrona
 
     if (token == null) {
       _showDialog('Error', 'No se encontró el token de autenticación.');
@@ -149,9 +152,9 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   // Guardar el usuario en el servidor
   Future<void> _saveUserToServer() async {
-    final apiUrl = Provider.of<Config>(context, listen: false).usuariosEndpoint;
-    final token = Provider.of<Config>(context, listen: false)
-        .authToken; // Obtener el token de autenticación
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl = config.usuariosEndpoint;
+    final token = await config.authToken;
 
     if (token == null) {
       _showDialog('Error', 'No se encontró el token de autenticación.');
@@ -184,8 +187,9 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   // Función para eliminar un usuario
   Future<void> _deleteUser(String username) async {
-    final apiUrl = Provider.of<Config>(context, listen: false).deleteUser;
-    final token = Provider.of<Config>(context, listen: false).authToken;
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl = config.deleteUser; // Endpoint para eliminar usuario
+    final token = await config.authToken; // Obtener el token de forma asíncrona
 
     if (token == null) {
       _showDialog('Error', 'No se encontró el token de autenticación.');
@@ -358,6 +362,14 @@ class _UsuariosPageState extends State<UsuariosPage> {
   @override
   void initState() {
     super.initState();
+    // Aquí registramos el contexto y verificamos la expiración de la sesión
+    final sessionManager = Provider.of<SessionManager>(context, listen: false);
+    final config = Provider.of<Config>(context, listen: false);
+    sessionManager
+        .setContext(context); // Registramos el contexto de la pantalla
+    sessionManager
+        .checkSessionExpiration(config); // Verificamos si el token ha expirado
+
     _fetchUsuarios(); // Llamamos a la función para obtener la lista de usuarios cuando se inicie la página
   }
 

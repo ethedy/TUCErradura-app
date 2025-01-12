@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HttpService.dart';
+import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
 
     // Obtener el token de autenticación y la URL del API desde el Config
     final config = Provider.of<Config>(context, listen: false);
-    final token = config.authToken;
+
+    // Obtén el token de manera asíncrona
+    final token =
+        await config.authToken; // Debemos esperar el resultado del Future
     final apiUrl = config.doorsEndpoint;
 
     if (token == null) {
@@ -99,12 +103,14 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
   @override
   void initState() {
     super.initState();
-    final token = Provider.of<Config>(context, listen: false).authToken;
-    if (token == null) {
-      _showDialog('Error', 'No se encontró el token de autenticación.');
-    } else {
-      _fetchDoors(); // Solo llamamos si el token está disponible
-    }
+    // Aquí registramos el contexto y verificamos la expiración de la sesión
+    final sessionManager = Provider.of<SessionManager>(context, listen: false);
+    final config = Provider.of<Config>(context, listen: false);
+    sessionManager
+        .setContext(context); // Registramos el contexto de la pantalla
+    sessionManager
+        .checkSessionExpiration(config); // Verificamos si el token ha expirado
+    _fetchDoors(); // Llamamos a la función para cargar las puertas en el inicio
   }
 
   // Función para abrir una puerta mediante la acción de GET
@@ -113,7 +119,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       _isLoading = true; // Activamos el indicador de carga
     });
     // Obtener el token de autenticación desde el Config
-    final token = Provider.of<Config>(context, listen: false).authToken;
+    final token = await Provider.of<Config>(context, listen: false).authToken;
 
     if (token == null) {
       setState(() {
