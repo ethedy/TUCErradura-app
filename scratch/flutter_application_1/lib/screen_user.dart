@@ -138,7 +138,7 @@ class _AccionesUserState extends State<AccionesUser> {
                         height:
                             size.height * 0.3, // Ajusta el tamaño de la imagen
                         child: Image.asset(
-                          'assets/images/U.jpeg',
+                          'assets\images\U.jpg',
                           fit: BoxFit
                               .cover, // Asegura que la imagen se ajuste bien
                         ),
