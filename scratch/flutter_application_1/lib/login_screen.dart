@@ -53,7 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
         String status = data["status"] ?? '';
         String role =
             data["role"] ?? 'unknown'; // Asegura que 'role' nunca sea null
-<<<<<<< HEAD
         String token =
             data["token"]; // Suponemos que el token está en la respuesta
 
@@ -63,10 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
               .setAuthToken(token, role);
 
           // Redirigir al usuario según su rol
-=======
-
-        if (status == "success") {
->>>>>>> main
           if (role == Config.adminRole) {
             Navigator.pushReplacement(
               context,

@@ -1,17 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:flutter_application_1/HttpService.dart';
 import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
-=======
-import 'package:flutter_application_1/config.dart';
-import 'package:flutter_application_1/constants.dart';
-import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
->>>>>>> main
 
 class PuertasDisponiblesPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -31,7 +24,6 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       _isLoading = true; // Activamos el indicador de carga
     });
 
-<<<<<<< HEAD
     // Obtener el token de autenticación y la URL del API desde el Config
     final config = Provider.of<Config>(context, listen: false);
 
@@ -54,20 +46,6 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         Uri.parse(apiUrl), // Convertimos apiUrl a Uri
         {'action': 'get_doors'}, // Este cuerpo es necesario en un POST
         token,
-=======
-    // Obtener la URL del API desde el Config
-    final apiUrl = Provider.of<Config>(context, listen: false)
-        .doorsEndpoint; // Usamos el endpoint de puertas
-
-    try {
-      // Hacemos un POST al servidor para obtener las puertas
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'action': 'get_doors', // Enviamos una acción como parámetro
-        }),
->>>>>>> main
       );
 
       if (response.statusCode == 200) {
@@ -75,7 +53,6 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         print(
             'Respuesta de la API: $data'); // Imprimir la respuesta para verificarla
 
-<<<<<<< HEAD
         // Acceder correctamente a la respuesta, asumiendo que está en 'data' -> 'doors'
         if (data['data'] != null && data['data']['doors'] != null) {
           //Verifica que la estructura de la respuesta de la API coincida con cómo estás tratando de acceder
@@ -86,14 +63,6 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         } else {
           _showDialog('Error',
               'La respuesta de la API no contiene las puertas esperadas.');
-=======
-        if (data['doors'] != null) {
-          setState(() {
-            puertasDisponibles = List<String>.from(data['doors']);
-          });
-        } else {
-          _showDialog('Error', 'La respuesta de la API no contiene puertas.');
->>>>>>> main
         }
       } else {
         setState(() {
@@ -102,19 +71,11 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         _showDialog('Error', 'No se pudo obtener las puertas disponibles.');
       }
     } catch (e) {
-<<<<<<< HEAD
       _showDialog(
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
       setState(() {
         puertasDisponibles = [];
       });
-=======
-      setState(() {
-        puertasDisponibles = [];
-      });
-      _showDialog(
-          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
->>>>>>> main
     } finally {
       setState(() {
         _isLoading = false; // Desactivamos el indicador de carga
@@ -142,7 +103,6 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
   @override
   void initState() {
     super.initState();
-<<<<<<< HEAD
     // Aquí registramos el contexto y verificamos la expiración de la sesión
     final sessionManager = Provider.of<SessionManager>(context, listen: false);
     final config = Provider.of<Config>(context, listen: false);
@@ -151,14 +111,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     sessionManager
         .checkSessionExpiration(config); // Verificamos si el token ha expirado
     _fetchDoors(); // Llamamos a la función para cargar las puertas en el inicio
-=======
-    _fetchDoors(); // Llamamos a la función para obtener las puertas disponibles cuando se inicie la página
->>>>>>> main
   }
 
   // Función para abrir una puerta mediante la acción de GET
   Future<void> _openDoor(String doorName) async {
-<<<<<<< HEAD
     setState(() {
       _isLoading = true; // Activamos el indicador de carga
     });
@@ -173,18 +129,12 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       return;
     }
     // Obtener la URL del API desde el Config
-=======
->>>>>>> main
     final apiUrl = Provider.of<Config>(context, listen: false).openDoorEndpoint;
     final url = '$apiUrl/$doorName'; // Acción para abrir la puerta específica
 
     try {
-<<<<<<< HEAD
       // Usamos el HttpService para hacer la solicitud GET
       final response = await HttpService().getRequest(url, token);
-=======
-      final response = await http.get(Uri.parse(url));
->>>>>>> main
 
       if (response.statusCode == 200) {
         _showDialog(
@@ -195,13 +145,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     } catch (e) {
       _showDialog(
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
-<<<<<<< HEAD
     } finally {
       setState(() {
         _isLoading = false; // Desactivamos el indicador de carga
       });
-=======
->>>>>>> main
     }
   }
 
@@ -264,11 +211,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                                   color: Colors.green,
                                 ),
                           onPressed: _isLoading
-<<<<<<< HEAD
                               ? null // Desactivamos el botón mientras está cargando
-=======
-                              ? null
->>>>>>> main
                               : () => _openDoor(puertasDisponibles[index]),
                         ),
                       ],

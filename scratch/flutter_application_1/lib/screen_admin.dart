@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/UsuariosDisponibles.dart';
 import 'package:flutter_application_1/config.dart';
@@ -7,12 +6,6 @@ import 'package:flutter_application_1/constants.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
 import 'package:provider/provider.dart';
-=======
-import 'package:flutter_application_1/UsuariosDisponibles.dart';
-import 'package:flutter_application_1/constants.dart';
-import 'package:flutter_application_1/login_screen.dart';
-import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
->>>>>>> main
 
 class AccionesAdmin extends StatefulWidget {
   final String username;
@@ -25,13 +18,10 @@ class AccionesAdmin extends StatefulWidget {
 class _AccionesAdminState extends State<AccionesAdmin> {
   // Función para cerrar sesión y regresar a la pantalla de login
   void _logout(BuildContext context) {
-<<<<<<< HEAD
     // Limpiar el token de autenticación
     final config = Provider.of<Config>(context, listen: false);
     config.clearAuthToken(); // Limpiar el token al desloguearse
 
-=======
->>>>>>> main
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -42,7 +32,6 @@ class _AccionesAdminState extends State<AccionesAdmin> {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
     // Obtener el SessionManager y Config
     final sessionManager = Provider.of<SessionManager>(context, listen: false);
     final config = Provider.of<Config>(context, listen: false);
@@ -52,8 +41,6 @@ class _AccionesAdminState extends State<AccionesAdmin> {
 
     // Verificar si la sesión ha expirado
     sessionManager.checkSessionExpiration(config);
-=======
->>>>>>> main
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
