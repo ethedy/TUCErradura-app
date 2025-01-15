@@ -19,7 +19,6 @@ class EditUserPage extends StatefulWidget {
 class _EditUserPageState extends State<EditUserPage> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
-  late TextEditingController _passwordController;
   String? selectedDay;
   TimeOfDay? selectedTime;
   String? selectedDoor;
@@ -40,8 +39,6 @@ class _EditUserPageState extends State<EditUserPage> {
     _usernameController = TextEditingController(text: widget.username);
     _emailController =
         TextEditingController(); // Lo puedes llenar con los datos iniciales de la API
-    _passwordController =
-        TextEditingController(); // Lo puedes llenar con los datos iniciales de la API
     selectedDay = null;
     selectedTime = null;
     selectedDoor = null;
@@ -54,7 +51,6 @@ class _EditUserPageState extends State<EditUserPage> {
     final updatedUser = {
       'username': _usernameController.text,
       'email': _emailController.text,
-      'password': _passwordController.text,
       'day': selectedDay,
       'time': selectedTime?.format(context),
       'door': selectedDoor,
@@ -90,11 +86,6 @@ class _EditUserPageState extends State<EditUserPage> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
-              obscureText: true,
             ),
             _buildDropdown('día', selectedDay, days, (newValue) {
               setState(() {
