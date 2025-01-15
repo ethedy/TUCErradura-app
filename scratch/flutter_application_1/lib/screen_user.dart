@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
+<<<<<<< HEAD
 import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/login_screen.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:flutter_application_1/modificarcontrase%C3%B1a.dart';
 import 'package:provider/provider.dart';
+=======
+import 'package:flutter_application_1/login_screen.dart';
+import 'package:flutter_application_1/constants.dart';
+>>>>>>> main
 
 class AccionesUser extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
@@ -18,10 +23,14 @@ class AccionesUser extends StatefulWidget {
 class _AccionesUserState extends State<AccionesUser> {
   // Función para cerrar sesión y regresar a la pantalla de login
   void _logout(BuildContext context) {
+<<<<<<< HEAD
     // Limpiar el token de autenticación
     final config = Provider.of<Config>(context, listen: false);
     config.clearAuthToken(); // Limpiar el token al desloguearse
 
+=======
+    // Aquí podrías limpiar cualquier dato de sesión si es necesario
+>>>>>>> main
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -32,6 +41,7 @@ class _AccionesUserState extends State<AccionesUser> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     // Obtener el SessionManager y Config
     final sessionManager = Provider.of<SessionManager>(context, listen: false);
     final config = Provider.of<Config>(context, listen: false);
@@ -41,6 +51,8 @@ class _AccionesUserState extends State<AccionesUser> {
 
     // Verificar si la sesión ha expirado
     sessionManager.checkSessionExpiration(config);
+=======
+>>>>>>> main
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -83,6 +95,7 @@ class _AccionesUserState extends State<AccionesUser> {
               },
             ),
             ListTile(
+<<<<<<< HEAD
               title: Text('Ajustes'),
               leading: Icon(Icons.security_rounded),
               onTap: () {
@@ -95,6 +108,8 @@ class _AccionesUserState extends State<AccionesUser> {
               },
             ),
             ListTile(
+=======
+>>>>>>> main
               title: Text('Cerrar sesión'),
               leading: Icon(Icons.exit_to_app),
               onTap: () => _logout(context),
@@ -138,7 +153,11 @@ class _AccionesUserState extends State<AccionesUser> {
                         height:
                             size.height * 0.3, // Ajusta el tamaño de la imagen
                         child: Image.asset(
+<<<<<<< HEAD
                           'assets/images/U.jpg',
+=======
+                          'assets/images/U.jpeg',
+>>>>>>> main
                           fit: BoxFit
                               .cover, // Asegura que la imagen se ajuste bien
                         ),

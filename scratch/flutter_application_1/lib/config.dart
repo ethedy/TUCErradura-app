@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_application_1/HttpService.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+=======
+>>>>>>> main
 
 class Config with ChangeNotifier {
   // URL de la API
@@ -11,6 +14,7 @@ class Config with ChangeNotifier {
   static const String adminRole = 'admin';
   static const String userRole = 'user';
 
+<<<<<<< HEAD
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   // Método para establecer el token de forma segura
@@ -69,13 +73,18 @@ class Config with ChangeNotifier {
     notifyListeners(); // Notifica a los oyentes
   }
 
+=======
+>>>>>>> main
   // Método para cambiar la URL de la API y notificar a los widgets
   void setApiUrl(String url) {
     apiUrl = url;
     notifyListeners();
   }
 
+<<<<<<< HEAD
   //ENDPOINTS
+=======
+>>>>>>> main
   // Método para obtener las puertas disponibles desde el servidor
   String get doorsEndpoint =>
       '$apiUrl/doors'; // Retorna la URL para las puertas
@@ -87,6 +96,7 @@ class Config with ChangeNotifier {
   // Método para obtener el endpoint de login
   String get loginEndpoint => '$apiUrl/login'; // Retorna la URL para el login
 
+<<<<<<< HEAD
   // Método para obtener el endpoint de usuarios (nombres)
   String get usuariosEndpoint => '$apiUrl/users';
 
@@ -140,4 +150,14 @@ class Config with ChangeNotifier {
     final token = await authToken;
     return await HttpService().deleteRequest(endpoint, token!);
   }
+=======
+  // Método para obtener el endpoint de usuarios
+  String get usuariosEndpoint => '$apiUrl/users';
+
+  // Método para obtener el endpoint de usuarios
+  String get addUserEndpoint => '$apiUrl/AddUser';
+
+  //Mètodo para eliminar usuario
+  String get deleteUser => '$apiUrl/DeleteUser';
+>>>>>>> main
 }

@@ -40,7 +40,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.2.2
   network_info_plus: ^5.0.2
+<<<<<<< HEAD
   flutter_secure_storage: ^9.2.4
+=======
+  google_sign_in: ^6.2.1
+>>>>>>> main
 
 dev_dependencies:
   flutter_test:
