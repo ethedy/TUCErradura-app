@@ -25,4 +25,8 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+<<<<<<< Updated upstream
 scratch/flutter_application_1/lib/screen.dart
+=======
+.vscode/settings.json
+>>>>>>> Stashed changes
