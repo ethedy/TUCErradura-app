@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'TUSErradura',
       theme: ThemeData(
-        primaryColor: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
+        primaryColor: kPrimaryColor,
+        scaffoldBackgroundColor: kPrimaryLightColor,
       ),
       home: Screens(),
     );
