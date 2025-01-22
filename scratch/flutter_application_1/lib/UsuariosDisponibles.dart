@@ -18,11 +18,13 @@ class _UsuariosPageState extends State<UsuariosPage> {
   List<bool> selectedUsuarios =
       []; // Lista para hacer seguimiento de la selección de usuarios
   bool _isLoading = false; // Para mostrar el indicador de carga
+  bool _hasError = false; // Indicador de error
 
   // Función para obtener la lista de usuarios desde la API usando HttpService
   Future<void> _fetchUsuarios() async {
     setState(() {
       _isLoading = true;
+      _hasError = false;
     });
 
     final config = Provider.of<Config>(context, listen: false);
@@ -32,6 +34,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
     if (token == null) {
       setState(() {
         _isLoading = false;
+        _hasError = true;
       });
       _showDialog('Error', 'No se encontró el token de autenticación.');
       return;
@@ -44,30 +47,31 @@ class _UsuariosPageState extends State<UsuariosPage> {
         var data = json.decode(response.body);
 
         if (data['users'] != null) {
-          // Ahora la respuesta contiene todos los detalles de los usuarios
           setState(() {
             usuarios = List<Map<String, String>>.from(data['users'].map((user) {
               return {
-                'name': user['name'], // Nombre del usuario
-                'email': user['email'], // Correo electrónico del usuario
-                'role': user['role'], // Rol del usuario
+                'name': user['name']?.toString() ?? 'Nombre no disponible',
+                'email': user['email']?.toString() ?? 'Email no disponible',
               };
             }));
-            // Inicializamos selectedUsuarios con una lista de 'false' para cada usuario
             selectedUsuarios = List<bool>.filled(usuarios.length, false);
           });
         } else {
+          setState(() {
+            _hasError = true;
+          });
           _showDialog('Error', 'La respuesta de la API no contiene usuarios.');
         }
       } else {
         setState(() {
-          usuarios = [];
+          _hasError = true;
         });
-        _showDialog('Error', 'No se pudo obtener la lista de usuarios.');
+        _showDialog('Error',
+            'No se pudo obtener la lista de usuarios. Código: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        usuarios = [];
+        _hasError = true;
       });
       _showDialog(
           'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
@@ -95,6 +99,80 @@ class _UsuariosPageState extends State<UsuariosPage> {
     );
   }
 
+  // Función para confirmar la eliminación
+  Future<bool?> _confirmDelete(String username) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmación de eliminación'),
+          content: Text(
+              '¿Estás seguro de que quieres eliminar al usuario $username?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Función para eliminar un usuario
+  Future<void> _deleteUser(String email) async {
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl = config.deleteUser; // Endpoint para eliminar usuario
+    final token = await config.authToken; // Obtener el token de forma asíncrona
+
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+
+    // Asegúrate de que 'usuariosEndpoint' esté configurado como la URL de tu servidor
+    final url =
+        Uri.parse('$apiUrl/$email'); // Usamos el email del usuario en la URL
+
+    // Confirmación de eliminación
+    bool? confirmDelete = await _confirmDelete(email);
+    if (confirmDelete != true) return;
+
+    // Cambiar el estado para mostrar el cargador
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Realizamos la solicitud DELETE a través de HttpService
+      final response = await HttpService().deleteRequest(url.toString(), token);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          // Encontramos el usuario en la lista y lo eliminamos
+          usuarios.removeWhere((user) => user['email'] == email);
+          selectedUsuarios.clear(); // Limpiamos la lista de selección
+        });
+        _showDialog('Éxito', 'El usuario con email $email ha sido eliminado.');
+      } else {
+        _showDialog(
+            'Error', 'No se pudo eliminar el usuario con email $email.');
+      }
+    } catch (e) {
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    } finally {
+      // Desactivar el cargador cuando la operación termine
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -109,35 +187,101 @@ class _UsuariosPageState extends State<UsuariosPage> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: usuarios.length,
-              itemBuilder: (context, index) {
-                var usuario = usuarios[index];
-                return ListTile(
-                  title: Text(usuario['name'] ?? 'Sin nombre'),
-                  subtitle: Text(usuario['email'] ?? 'Sin email'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      // Navegar a EditUserPage con solo el email
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditUserPage(
-                            email: usuario['email']!, // Pasamos el email
+          : _hasError
+              ? Center(child: Text('Hubo un error al cargar los usuarios'))
+              : ListView.builder(
+                  itemCount: usuarios.length,
+                  itemBuilder: (context, index) {
+                    var usuario = usuarios[index];
+                    return Container(
+                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Información del usuario
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  usuario['name'] ?? 'Sin nombre',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 10), // Espacio adicional
+                                Opacity(
+                                  opacity: 0.6,
+                                  child: Text(
+                                    usuario['email'] ?? 'Sin email',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Botones de acción alineados horizontalmente
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  _deleteUser(usuario['name'] ?? '');
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditUserPage(
+                                        email: usuario['email'] ?? '',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
+          onPressed: () {
+            // No hace nada por ahora, solo se muestra el botón
+          },
+          child: Text('Añadir Nuevo Usuario'),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Aquí puedes agregar la lógica para agregar un nuevo usuario si es necesario
-        },
-        child: Icon(Icons.add),
+          ),
+        ),
       ),
     );
   }

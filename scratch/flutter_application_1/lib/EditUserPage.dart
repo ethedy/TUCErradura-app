@@ -1,220 +1,262 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/config.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_application_1/HttpService.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_1/config.dart';
 
 class EditUserPage extends StatefulWidget {
-  final String
-      email; // Cambié 'username' por 'email' para tener un identificador único.
+  final String email; // Email del usuario a editar
 
-  const EditUserPage({
-    super.key,
-    required this.email,
-  });
+  const EditUserPage({super.key, required this.email});
 
   @override
   _EditUserPageState createState() => _EditUserPageState();
 }
 
 class _EditUserPageState extends State<EditUserPage> {
-  late TextEditingController _usernameController;
-  late TextEditingController _emailController;
-  Map<String, dynamic> userInfo =
-      {}; // Variable para almacenar la información del usuario.
-  Map<String, List<Map<String, String>>> schedule =
-      {}; // Para almacenar los horarios del usuario
+  late String _name;
+  late String _email;
+  late Map<String, List<Map<String, String>>>
+      _schedule; // Para manejar el horario
+  bool _isLoading = false;
+  bool _hasError = false;
+
+  // Controladores para los campos de texto
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  // Obtener los datos del usuario desde el servidor
+  Future<void> _fetchUserData() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl =
+        config.editUser; // Endpoint para obtener los datos del usuario
+    final token = await config.authToken;
+
+    // Verificar que el token no sea nulo
+    if (token == null) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+
+    try {
+      final response =
+          await HttpService().getRequest('$apiUrl/${widget.email}', token);
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        // Verificar si los datos esenciales están presentes
+        if (data == null || data['name'] == null || data['email'] == null) {
+          setState(() {
+            _hasError = true;
+          });
+          _showDialog('Error', 'Los datos del usuario están incompletos.');
+          return;
+        }
+
+        // Si 'schedule' no está presente, inicializarlo como un mapa vacío
+        var scheduleData = data['schedule'] ?? {};
+
+        setState(() {
+          _name = data['name'];
+          _email = data['email'];
+          _schedule = Map<String, List<Map<String, String>>>.from(
+              scheduleData); // Asegurarnos de que 'schedule' sea un mapa
+
+          // Rellenamos los controladores con la información del usuario
+          _nameController.text = _name;
+          _emailController.text = _email;
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+        });
+        _showDialog('Error', 'No se pudo obtener la información del usuario.');
+      }
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+      });
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Función para mostrar un AlertDialog
+  void _showDialog(String title, String content) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cierra el diálogo
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Función para guardar los cambios del usuario
+  Future<void> _saveUserChanges() async {
+    final config = Provider.of<Config>(context, listen: false);
+    final apiUrl = config.editUser; // Endpoint para editar el usuario
+    final token = await config.authToken;
+
+    // Verificar que el token no sea nulo
+    if (token == null) {
+      _showDialog('Error', 'No se encontró el token de autenticación.');
+      return;
+    }
+
+    // Realizamos la solicitud PUT para editar los datos del usuario
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final updatedUser = {
+        'name': _nameController.text,
+        'email': _emailController.text,
+        'schedule': _schedule, // Se envía el horario actualizado
+      };
+
+      final response =
+          await HttpService().putRequest(apiUrl, updatedUser, token);
+
+      if (response.statusCode == 200) {
+        _showDialog('Éxito', 'Usuario actualizado correctamente.');
+      } else {
+        _showDialog('Error', 'No se pudo actualizar el usuario.');
+      }
+    } catch (e) {
+      _showDialog(
+          'Error de Red', 'No se pudo conectar al servidor. Detalles: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController();
-    _emailController = TextEditingController();
-    _fetchUserInfo(); // Llamada para obtener la información del usuario
+    _fetchUserData(); // Cargar los datos del usuario al inicio
   }
 
-  // Obtener la información del usuario desde el servidor
-  Future<void> _fetchUserInfo() async {
-    final apiUrl = Provider.of<Config>(context, listen: false).editUser;
+  // Función para editar el horario (schedule) de un día
+  Widget _buildScheduleField(String day) {
+    List<Map<String, String>> daySchedule = _schedule[day] ?? [];
 
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': widget.email}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        userInfo =
-            data['user']; // Guardamos la información del usuario en la variable
-        _usernameController.text = userInfo['name'];
-        _emailController.text = userInfo['email'];
-        schedule = userInfo['schedule'] ??
-            {}; // Si no tiene horarios, asignamos un mapa vacío
-      });
-    } else {
-      // Manejo de error si no se encuentra al usuario
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('No se pudo obtener la información del usuario'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          day,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-      );
-    }
-  }
-
-  // Función para guardar los cambios
-  Future<void> _saveChanges() async {
-    final apiUrl = Provider.of<Config>(context, listen: false).editUser;
-    final updatedUser = {
-      'username': _usernameController.text,
-      'email': _emailController.text,
-      'schedule': schedule, // Enviamos los horarios modificados
-    };
-
-    final response = await http.put(
-      Uri.parse(apiUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updatedUser),
-    );
-
-    if (response.statusCode == 200) {
-      Navigator.pop(context); // Cerrar la página al guardar los cambios
-    } else {
-      // Si ocurre algún error en la actualización, muestra un mensaje
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('No se pudo guardar la información del usuario'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  // Función para seleccionar horario de un día
-  Future<void> _selectTime(String day) async {
-    final selectedDaySchedule = schedule[day] ?? [];
-    final selectedTimes = await showDialog<List<Map<String, String>>>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Seleccionar Horarios para $day'),
-          content: ListView.builder(
-            itemCount: selectedDaySchedule.length +
-                1, // Agregar un botón para nuevo horario
-            itemBuilder: (context, index) {
-              if (index == selectedDaySchedule.length) {
-                return ListTile(
-                  title: Text('Añadir nuevo horario'),
-                  onTap: () {
-                    Navigator.pop(context, [
-                      ...selectedDaySchedule,
-                      {'start': '00:00', 'end': '01:00'}
-                    ]);
-                  },
-                );
-              }
-              final time = selectedDaySchedule[index];
-              return ListTile(
-                title: Text('${time['start']} - ${time['end']}'),
-                onTap: () async {
-                  // Selección de nuevo horario
-                  final timeRange = await _pickTimeRange(context);
-                  if (timeRange != null) {
-                    selectedDaySchedule[index] = {
-                      'start': timeRange[0],
-                      'end': timeRange[1]
-                    };
+        ...daySchedule.map((period) {
+          return Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  initialValue: period['start'],
+                  decoration: InputDecoration(labelText: 'Start Time'),
+                  onChanged: (value) {
                     setState(() {
-                      schedule[day] = selectedDaySchedule;
+                      period['start'] = value;
                     });
-                  }
-                },
-              );
-            },
-          ),
-        );
-      },
+                  },
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: TextFormField(
+                  initialValue: period['end'],
+                  decoration: InputDecoration(labelText: 'End Time'),
+                  onChanged: (value) {
+                    setState(() {
+                      period['end'] = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+        SizedBox(height: 16),
+      ],
     );
-    if (selectedTimes != null) {
-      setState(() {
-        schedule[day] = selectedTimes;
-      });
-    }
-  }
-
-  // Método para seleccionar el rango de tiempo
-  Future<List<String>?> _pickTimeRange(BuildContext context) async {
-    final start =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (start == null) return null;
-    final end = await showTimePicker(context: context, initialTime: start);
-    if (end == null) return null;
-    return [start.format(context), end.format(context)];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Usuario'),
+        title: Text('Editar Usuario'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Nombre de usuario'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            ..._buildScheduleWidgets(), // Mostrar los horarios
-            ElevatedButton(
-              onPressed: _saveChanges,
-              child: const Text('Guardar Cambios'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _hasError
+              ? Center(
+                  child: Text('Hubo un error al cargar los datos del usuario'))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Nombre del usuario
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Nombre',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 16),
 
-  // Función para construir los widgets de los horarios de los días de la semana
-  List<Widget> _buildScheduleWidgets() {
-    final scheduleWidgets = <Widget>[];
-    schedule.forEach((day, times) {
-      scheduleWidgets.add(
-        ListTile(
-          title: Text(day),
-          subtitle: Text(times.isEmpty
-              ? 'No hay horarios disponibles'
-              : times.map((e) => '${e['start']} - ${e['end']}').join(', ')),
-          onTap: () => _selectTime(day),
-        ),
-      );
-    });
-    return scheduleWidgets;
+                        // Email del usuario (solo lectura)
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          enabled: false, // No editable
+                        ),
+                        SizedBox(height: 16),
+
+                        // Horario de trabajo (schedule)
+                        ...['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
+                            .map((day) => _buildScheduleField(day)),
+
+                        SizedBox(height: 32),
+
+                        // Botón para guardar cambios
+                        ElevatedButton(
+                          onPressed: _saveUserChanges,
+                          child: Text('Guardar Cambios'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+    );
   }
 }

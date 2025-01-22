@@ -98,6 +98,19 @@ class HttpService {
     }
   }
 
+  Future<http.Response> putRequest(
+      String url, Map<String, dynamic> body, String token) async {
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(body),
+    );
+    return response;
+  }
+
   // Método privado para construir los headers con el token
   Map<String, String> _buildHeaders(String token) {
     return {

@@ -100,7 +100,6 @@ class Config with ChangeNotifier {
   String get addUserEndpoint => '$apiUrl/AddUser';
 
   // Metodo para editar el usuario
-
   String get editUser => '$apiUrl/editUser';
 
   //Mètodo para cambiar contraseña
