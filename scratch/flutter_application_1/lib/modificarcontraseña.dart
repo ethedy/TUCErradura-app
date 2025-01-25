@@ -11,8 +11,6 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _currentPasswordController =
-      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -68,7 +66,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     // Validar que el formulario esté correcto
     if (_formKey.currentState?.validate() ?? false) {
-      final currentPassword = _currentPasswordController.text;
       final newPassword = _newPasswordController.text;
 
       if (token == null) {
@@ -80,7 +77,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       // Construir el cuerpo de la solicitud
       final requestData = {
-        "current_password": currentPassword,
         "new_password": newPassword,
       };
 
@@ -161,18 +157,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     SizedBox(height: 20),
                     // Campos para cambiar la contraseña
-                    TextFormField(
-                      controller: _currentPasswordController,
-                      obscureText: true,
-                      decoration:
-                          InputDecoration(labelText: 'Contraseña actual'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor ingresa tu contraseña actual';
-                        }
-                        return null;
-                      },
-                    ),
                     TextFormField(
                       controller: _newPasswordController,
                       obscureText: true,
