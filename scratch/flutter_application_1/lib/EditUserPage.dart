@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/config.dart';
 
 class EditUserPage extends StatefulWidget {
-  final String email; // Email del usuario a editar
+  final String email;
 
   const EditUserPage({super.key, required this.email});
 
@@ -16,16 +16,33 @@ class EditUserPage extends StatefulWidget {
 class _EditUserPageState extends State<EditUserPage> {
   late String _name;
   late String _email;
-  late Map<String, List<Map<String, String>>>
-      _schedule; // Para manejar el horario
+  Map<String, List<Map<String, String>>> _schedule = {};
   bool _isLoading = false;
   bool _hasError = false;
 
-  // Controladores para los campos de texto
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  // Obtener los datos del usuario desde el servidor
+  final List<String> _daysOfWeek = [
+    'Lun',
+    'Mar',
+    'Mie',
+    'Jue',
+    'Vie',
+    'Sab',
+    'Dom'
+  ];
+  final Map<String, bool> _selectedDays = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (var day in _daysOfWeek) {
+      _selectedDays[day] = false;
+    }
+    _fetchUserData();
+  }
+
   Future<void> _fetchUserData() async {
     setState(() {
       _isLoading = true;
@@ -33,11 +50,9 @@ class _EditUserPageState extends State<EditUserPage> {
     });
 
     final config = Provider.of<Config>(context, listen: false);
-    final apiUrl =
-        config.editUser; // Endpoint para obtener los datos del usuario
+    final apiUrl = config.editUser;
     final token = await config.authToken;
 
-    // Verificar que el token no sea nulo
     if (token == null) {
       setState(() {
         _isLoading = false;
@@ -54,7 +69,6 @@ class _EditUserPageState extends State<EditUserPage> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
 
-        // Verificar si los datos esenciales están presentes
         if (data == null || data['name'] == null || data['email'] == null) {
           setState(() {
             _hasError = true;
@@ -63,16 +77,18 @@ class _EditUserPageState extends State<EditUserPage> {
           return;
         }
 
-        // Si 'schedule' no está presente, inicializarlo como un mapa vacío
-        var scheduleData = data['schedule'] ?? {};
+        var scheduleData = Map<String, dynamic>.from(data['schedule'] ?? {});
+        Map<String, List<Map<String, String>>> parsedSchedule = {};
+        scheduleData.forEach((key, value) {
+          parsedSchedule[key] = List<Map<String, String>>.from(
+              value.map((item) => Map<String, String>.from(item)));
+          _selectedDays[key] = true;
+        });
 
         setState(() {
           _name = data['name'];
           _email = data['email'];
-          _schedule = Map<String, List<Map<String, String>>>.from(
-              scheduleData); // Asegurarnos de que 'schedule' sea un mapa
-
-          // Rellenamos los controladores con la información del usuario
+          _schedule = parsedSchedule;
           _nameController.text = _name;
           _emailController.text = _email;
         });
@@ -95,36 +111,16 @@ class _EditUserPageState extends State<EditUserPage> {
     }
   }
 
-  // Función para mostrar un AlertDialog
-  void _showDialog(String title, String content) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Cierra el diálogo
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Función para guardar los cambios del usuario
   Future<void> _saveUserChanges() async {
     final config = Provider.of<Config>(context, listen: false);
-    final apiUrl = config.editUser; // Endpoint para editar el usuario
+    final apiUrl = config.editUser;
     final token = await config.authToken;
 
-    // Verificar que el token no sea nulo
     if (token == null) {
       _showDialog('Error', 'No se encontró el token de autenticación.');
       return;
     }
 
-    // Realizamos la solicitud PUT para editar los datos del usuario
     try {
       setState(() {
         _isLoading = true;
@@ -133,11 +129,11 @@ class _EditUserPageState extends State<EditUserPage> {
       final updatedUser = {
         'name': _nameController.text,
         'email': _emailController.text,
-        'schedule': _schedule, // Se envía el horario actualizado
+        'schedule': _schedule,
       };
 
-      final response =
-          await HttpService().putRequest(apiUrl, updatedUser, token);
+      final response = await HttpService()
+          .putRequest('$apiUrl/${widget.email}', updatedUser, token);
 
       if (response.statusCode == 200) {
         _showDialog('Éxito', 'Usuario actualizado correctamente.');
@@ -154,33 +150,35 @@ class _EditUserPageState extends State<EditUserPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserData(); // Cargar los datos del usuario al inicio
+  void _addTimeSlot(String day) {
+    setState(() {
+      _schedule[day] ??= [];
+      _schedule[day]!.add({'start': '', 'end': ''});
+    });
   }
 
-  // Función para editar el horario (schedule) de un día
-  Widget _buildScheduleField(String day) {
-    List<Map<String, String>> daySchedule = _schedule[day] ?? [];
+  void _removeTimeSlot(String day, int index) {
+    setState(() {
+      _schedule[day]?.removeAt(index);
+    });
+  }
+
+  Widget _buildScheduleEditor(String day) {
+    List<Map<String, String>> timeSlots = _schedule[day] ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          day,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        ...daySchedule.map((period) {
-          return Row(
+        for (int i = 0; i < timeSlots.length; i++)
+          Row(
             children: [
               Expanded(
                 child: TextFormField(
-                  initialValue: period['start'],
-                  decoration: InputDecoration(labelText: 'Start Time'),
+                  initialValue: timeSlots[i]['start'],
+                  decoration: InputDecoration(labelText: 'Inicio'),
                   onChanged: (value) {
                     setState(() {
-                      period['start'] = value;
+                      _schedule[day]![i]['start'] = value;
                     });
                   },
                 ),
@@ -188,20 +186,47 @@ class _EditUserPageState extends State<EditUserPage> {
               SizedBox(width: 8),
               Expanded(
                 child: TextFormField(
-                  initialValue: period['end'],
-                  decoration: InputDecoration(labelText: 'End Time'),
+                  initialValue: timeSlots[i]['end'],
+                  decoration: InputDecoration(labelText: 'Fin'),
                   onChanged: (value) {
                     setState(() {
-                      period['end'] = value;
+                      _schedule[day]![i]['end'] = value;
                     });
                   },
                 ),
               ),
+              IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _removeTimeSlot(day, i),
+              ),
             ],
-          );
-        }).toList(),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: Icon(Icons.add),
+            label: Text('Agregar franja'),
+            onPressed: () => _addTimeSlot(day),
+          ),
+        ),
         SizedBox(height: 16),
       ],
+    );
+  }
+
+  void _showDialog(String title, String content) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -214,14 +239,13 @@ class _EditUserPageState extends State<EditUserPage> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _hasError
-              ? Center(
-                  child: Text('Hubo un error al cargar los datos del usuario'))
+              ? Center(child: Text('Hubo un error al cargar los datos.'))
               : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: SingleChildScrollView(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Nombre del usuario
                         TextFormField(
                           controller: _nameController,
                           decoration: InputDecoration(
@@ -230,28 +254,58 @@ class _EditUserPageState extends State<EditUserPage> {
                           ),
                         ),
                         SizedBox(height: 16),
-
-                        // Email del usuario (solo lectura)
                         TextFormField(
                           controller: _emailController,
+                          enabled: false,
                           decoration: InputDecoration(
                             labelText: 'Email',
                             border: OutlineInputBorder(),
                           ),
-                          enabled: false, // No editable
                         ),
-                        SizedBox(height: 16),
-
-                        // Horario de trabajo (schedule)
-                        ...['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
-                            .map((day) => _buildScheduleField(day)),
-
-                        SizedBox(height: 32),
-
-                        // Botón para guardar cambios
-                        ElevatedButton(
-                          onPressed: _saveUserChanges,
-                          child: Text('Guardar Cambios'),
+                        SizedBox(height: 24),
+                        Text('Selecciona los días laborales:',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        Wrap(
+                          spacing: 10,
+                          children: _daysOfWeek.map((day) {
+                            return FilterChip(
+                              label: Text(day),
+                              selected: _selectedDays[day]!,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _selectedDays[day] = selected;
+                                  if (!selected) {
+                                    _schedule.remove(day);
+                                  } else {
+                                    _schedule[day] ??= [];
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(height: 24),
+                        ..._selectedDays.entries
+                            .where((entry) => entry.value)
+                            .map((entry) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 16),
+                                    Text(entry.key,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18)),
+                                    _buildScheduleEditor(entry.key),
+                                  ],
+                                )),
+                        SizedBox(height: 24),
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: _saveUserChanges,
+                            icon: Icon(Icons.save),
+                            label: Text('Guardar Cambios'),
+                          ),
                         ),
                       ],
                     ),

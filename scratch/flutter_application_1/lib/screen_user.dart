@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/EditUserPage.dart';
 import 'package:flutter_application_1/PuertasDisponiblesPage.dart';
 import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
@@ -72,7 +73,6 @@ class _AccionesUserState extends State<AccionesUser> {
               title: Text('Lista de Puertas Disponibles'),
               leading: Icon(Icons.door_front_door),
               onTap: () {
-                // Navegar a la página de Puertas Disponibles
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -90,6 +90,18 @@ class _AccionesUserState extends State<AccionesUser> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChangePasswordScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Editar'),
+              leading: Icon(Icons.edit),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditUserPage(email: widget.username),
                   ),
                 );
               },
