@@ -97,13 +97,23 @@ class _AccionesUserState extends State<AccionesUser> {
             ListTile(
               title: Text('Editar'),
               leading: Icon(Icons.edit),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditUserPage(email: widget.username),
-                  ),
-                );
+              onTap: () async {
+                final config = Provider.of<Config>(context, listen: false);
+                final email = await config.userEmail;
+                if (email != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditUserPage(email: email),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Error: No se pudo obtener el email del usuario')),
+                  );
+                }
               },
             ),
             ListTile(

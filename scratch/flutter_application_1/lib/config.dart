@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HttpService.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class Config with ChangeNotifier {
   // URL de la API
@@ -73,6 +74,19 @@ class Config with ChangeNotifier {
   void setApiUrl(String url) {
     apiUrl = url;
     notifyListeners();
+  }
+
+  // Método para obtener el email decodificado desde el token
+  Future<String?> get userEmail async {
+    final token = await authToken;
+    if (token == null) return null;
+    try {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['email'];
+    } catch (e) {
+      print('Error al decodificar el token: $e');
+      return null;
+    }
   }
 
   //ENDPOINTS
