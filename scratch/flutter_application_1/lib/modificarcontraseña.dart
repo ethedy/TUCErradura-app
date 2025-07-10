@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/SessionManager.dart';
 import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/screen_user.dart';
 import 'package:provider/provider.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -15,9 +16,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   String? _errorMessage;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
 
-  Map<String, dynamic>? _userData; // Para almacenar los datos del usuario
-  // Cargar los datos del usuario al iniciar la pantalla
+  Map<String, dynamic>? _userData;
+
   Future<void> _loadUserData() async {
     final config = Provider.of<Config>(context, listen: false);
     final token = await config.authToken;
@@ -28,15 +31,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       });
       return;
     }
+
     try {
       final response = await config.postRequest(config.infoBaseDatos, {});
       if (response.statusCode == 200) {
-        // Decodificar la respuesta a Map<String, dynamic>
         final Map<String, dynamic> data = jsonDecode(response.body);
-        // Actualizar el estado con los datos del usuario
         setState(() {
-          _userData =
-              data['user']; // Ahora puedes acceder a la información del usuario
+          _userData = data['user'];
         });
       } else {
         setState(() {
@@ -53,18 +54,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // Cargar datos del usuario al iniciar
+    _loadUserData();
   }
 
-  // Función para enviar el cambio de contraseña
   Future<void> _changePassword() async {
     final config = Provider.of<Config>(context, listen: false);
-
-    // Obtener el token y URL desde el provider de Config
-    final token = config.authToken;
+    final token = await config.authToken;
     final apiUrl = config.modifyPassword;
 
-    // Validar que el formulario esté correcto
     if (_formKey.currentState?.validate() ?? false) {
       final newPassword = _newPasswordController.text;
 
@@ -75,29 +72,60 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         return;
       }
 
-      // Construir el cuerpo de la solicitud
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
       final requestData = {
         "new_password": newPassword,
       };
 
       try {
-        // Usar HttpService para enviar la solicitud POST
         final response = await config.postRequest(apiUrl, requestData);
 
         if (response.statusCode == 200) {
-          // Si la respuesta es exitosa, mostrar un mensaje de éxito
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Contraseña cambiada exitosamente')),
+          final String userName = _userData?['name'] ?? 'Usuario';
+
+          setState(() {
+            _isLoading = false;
+          });
+
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("Contraseña cambiada"),
+                content: Text("Tu contraseña se cambió exitosamente."),
+                actions: [
+                  TextButton(
+                    child: Text("Aceptar"),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Cerrar diálogo
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AccionesUser(username: userName),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           );
         } else {
-          // Si hay un error con el servidor
           setState(() {
+            _isLoading = false;
             _errorMessage =
                 'Error al cambiar la contraseña. Código: ${response.statusCode}';
           });
         }
       } catch (e) {
         setState(() {
+          _isLoading = false;
           _errorMessage = 'Error de red: $e';
         });
       }
@@ -106,62 +134,58 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener el SessionManager y Config
     final sessionManager = Provider.of<SessionManager>(context, listen: false);
     final config = Provider.of<Config>(context, listen: false);
-
-    // Registrar el contexto de la pantalla actual
     sessionManager.setContext(context);
-
-    // Verificar si la sesión ha expirado
     sessionManager.checkSessionExpiration(config);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Cambiar Contraseña'),
-      ),
+      appBar: AppBar(title: Text('Cambiar Contraseña')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _userData == null
-            ? Center(
-                child:
-                    CircularProgressIndicator()) // Mostrar carga mientras obtenemos datos
+            ? Center(child: CircularProgressIndicator())
             : Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListView(
                   children: [
                     if (_errorMessage != null) ...[
-                      Text(
-                        _errorMessage!,
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      Text(_errorMessage!, style: TextStyle(color: Colors.red)),
                       SizedBox(height: 16),
                     ],
-                    // Información del usuario (solo visualización)
                     TextFormField(
-                      initialValue: _userData!['name'] ?? 'N/A',
+                      initialValue: _userData!['name'] ?? '',
                       decoration: InputDecoration(labelText: 'Nombre'),
-                      enabled: false, // Solo lectura
+                      enabled: false,
                     ),
                     TextFormField(
-                      initialValue: _userData!['email'] ?? 'N/A',
+                      initialValue: _userData!['email'] ?? '',
                       decoration:
                           InputDecoration(labelText: 'Correo electrónico'),
-                      enabled: false, // Solo lectura
+                      enabled: false,
                     ),
                     TextFormField(
-                      initialValue: _userData!['role'] ?? 'N/A',
-                      decoration: InputDecoration(labelText: 'Role'),
-                      enabled: false, // Solo lectura
+                      initialValue: _userData!['role'] ?? '',
+                      decoration: InputDecoration(labelText: 'Rol'),
+                      enabled: false,
                     ),
                     SizedBox(height: 20),
-                    // Campos para cambiar la contraseña
                     TextFormField(
                       controller: _newPasswordController,
-                      obscureText: true,
-                      decoration:
-                          InputDecoration(labelText: 'Nueva contraseña'),
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Nueva contraseña',
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Por favor ingresa una nueva contraseña';
@@ -174,7 +198,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: true,
+                      obscureText: _obscurePassword,
                       decoration: InputDecoration(
                           labelText: 'Confirmar nueva contraseña'),
                       validator: (value) {
@@ -189,8 +213,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _changePassword,
-                      child: Text('Cambiar contraseña'),
+                      onPressed: _isLoading ? null : _changePassword,
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text('Cambiar contraseña'),
                     ),
                   ],
                 ),
