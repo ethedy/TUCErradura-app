@@ -5,6 +5,21 @@ import 'package:flutter_application_1/HttpService.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:provider/provider.dart';
 
+/* 
+Pantalla principal: UsuariosPage muestra una lista de usuarios y recibe como parámetro el nombre del usuario actual (username).
+Carga de datos: Al iniciarse, llama a _fetchUsuarios() para obtener los usuarios desde un endpoint (API) usando un token de autenticación.
+Visualización: Los usuarios se muestran en tarjetas con su nombre y correo, junto a botones para editar o eliminar.
+Eliminar usuario:
+  Solicita confirmación mediante un AlertDialog.
+  Si se confirma, envía una solicitud DELETE al servidor y elimina el usuario de la lista.
+Editar usuario: Navega a la pantalla EditUserPage, pasando el email como parámetro.
+  Botón "Añadir Nuevo Usuario": Solo se muestra visualmente, pero no tiene funcionalidad activa aún.
+Componentes clave:
+  HttpService: Encargado de las peticiones HTTP (GET y DELETE).
+  Config: Proveedor que gestiona configuraciones globales como el token o las URLs.
+  Provider: Usado para acceder al Config en el árbol de widgets.
+*/
+
 class UsuariosPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
   const UsuariosPage({super.key, required this.username});

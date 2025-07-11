@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/login_screen.dart';
 
-//Se crea un popup de forma global que pueda aparecer en cualquier pantalla,
-//sin importar en qué parte de la aplicación te encuentres.
+/*SessionManager gestiona la expiración de sesión del usuario en una aplicación. 
+Funciones clave:
+  Guardar el contexto de la app:
+      Usa setContext() para almacenar el BuildContext, lo que permite mostrar un popup desde cualquier parte de la app.
+  Verificar si la sesión ha expirado:
+      La función checkSessionExpiration() comprueba si el token de autenticación es válido.
+      Si no hay token o el rol del usuario no se puede obtener, se muestra un popup de sesión expirada.
+      Si el token y rol son válidos, imprime el rol (admin o user) para posibles lógicas adicionales.
+  Mostrar un diálogo de sesión expirada:
+      Si la sesión expiró, se muestra un AlertDialog informando al usuario y redirigiéndolo a la pantalla de login (LoginScreen).
+*/
 
 class SessionManager with ChangeNotifier {
   BuildContext? _context;

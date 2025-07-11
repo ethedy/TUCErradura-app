@@ -4,6 +4,26 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
+//Este código define una clase Config que gestiona la autenticación, autorización, y configuración de endpoints para comunicarse con una API REST
+//Funciones principales de la clase Config:
+//Manejo de autenticación:
+//	Guarda, obtiene y borra el token JWT de acceso de forma segura usando flutter_secure_storage.
+//	Controla la expiración del token según el rol (user: 15 min, admin: 60 min).
+//	Extrae el email del usuario desde el token usando jwt_decoder.
+
+//Gestión de roles:
+//	Guarda el rol del usuario autenticado (admin o user).
+//	Configuración de la API:
+//	Define y permite cambiar dinámicamente la URL base de la API.
+//	Proporciona métodos para acceder a los distintos endpoints (login, usuarios, puertas, etc.).
+
+//Validación y solicitudes HTTP:
+//	Antes de hacer cualquier solicitud, verifica que el usuario esté autenticado.
+//	Facilita llamadas HTTP GET, POST y DELETE a través de la clase HttpService.
+
+//Notificación a la UI:
+//  Usa ChangeNotifier para que los widgets de Flutter puedan reaccionar a cambios en la configuración o autenticación.
+
 class Config with ChangeNotifier {
   // URL de la API
   String apiUrl = 'http://localhost:3000';

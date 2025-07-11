@@ -7,6 +7,26 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/constants.dart';
 
+//Este código define una pantalla de inicio de sesión (LoginScreen) en una app Flutter.
+//Permite que el usuario se autentique con su correo electrónico y contraseña, y según su rol (admin o user), lo redirige a una pantalla específica de la aplicación.
+//Funciones principales del programa:
+//Formulario de Login:
+//  Contiene dos campos de texto para ingresar correo electrónico y contraseña.
+//  Al presionar el botón “Ingresar”, se llama al método _login().
+
+//Proceso de autenticación (_login):
+//  Envía una solicitud POST a un endpoint (/login) del backend con los datos del usuario.
+//  Si la respuesta es exitosa (statusCode 200) y el servidor devuelve un token, role y status:
+//  Guarda el token de forma segura usando el Provider y la clase Config.
+//  Redirige al usuario a la pantalla correspondiente:
+//  AccionesAdmin si es admin.
+//  AccionesUser si es usuario normal.
+//  Si el login falla o el rol es desconocido, muestra un mensaje de error en un diálogo (AlertDialog).
+//Interfaz de usuario:
+//  Muestra una imagen superior y un título.
+//  Incluye el formulario de login y un logo en la parte inferior.
+//  Usa diseño responsive (MediaQuery) para adaptar el layout a la pantalla.
+
 class LoginScreen extends StatefulWidget {
   @override
   // ignore: library_private_types_in_public_api

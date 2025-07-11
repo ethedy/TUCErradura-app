@@ -6,6 +6,20 @@ import 'package:http/http.dart' as http;
 //HttpService se usa para realizar solicitudes HTTP (GET, POST, DELETE) según lo que se necesite.
 //La responsabilidad de HttpService es hacer las solicitudes y manejar los errores asociados a esas solicitudes, no gestionar la configuración directamente.
 
+//Funciones principales de HttpService:
+//Autenticación con token (Bearer):
+//	Todas las solicitudes incluyen un token JWT en el encabezado HTTP con el formato Authorization: Bearer <token>,
+//  lo cual es requerido por muchas APIs para autenticar al usuario.
+
+//Solicitudes HTTP con manejo de errores:
+//	getRequest(): Realiza una solicitud GET con token y maneja errores comunes como token inválido, acceso prohibido o problemas de red.
+//	postRequest(): Envía datos al servidor (en formato JSON) mediante POST y valida la respuesta.
+//	deleteRequest(): Elimina recursos protegidos, incluyendo el token en la cabecera.
+//	putRequest(): Actualiza recursos existentes en el servidor con datos en formato JSON.
+
+//Encabezados personalizados:
+//Usa un método privado _buildHeaders() para construir los encabezados con el token y Content-Type: application/json.
+
 //Pondremos el token en el header Authorization con el prefijo Bearer para que la API lo reconozca como un token de acceso
 class HttpService {
 // Función para realizar una solicitud GET con token
@@ -121,10 +135,9 @@ class HttpService {
   }
 }
 
-
 //EXPLICACION
-//_buildHeaders: Este método privado construye los headers de la solicitud. 
-//Acepta un token y lo agrega al header Authorization como Bearer <token>. 
+//_buildHeaders: Este método privado construye los headers de la solicitud.
+//Acepta un token y lo agrega al header Authorization como Bearer <token>.
 //Además, se incluye el header Content-Type: application/json para asegurarse de que los datos sean interpretados como JSON.
 //Métodos getRequest y postRequest:
 //En ambos métodos, primero se obtiene el token desde el AuthProvider usando Provider.of<AuthProvider>(context, listen: false).token.

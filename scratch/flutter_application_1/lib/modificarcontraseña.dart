@@ -5,6 +5,32 @@ import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/screen_user.dart';
 import 'package:provider/provider.dart';
 
+/*
+Componentes principales:
+	TextFormField para ingresar y confirmar la nueva contraseña.
+	Provider para acceder a configuraciones globales como el token de sesión.
+	SessionManager para verificar si la sesión expiró.
+	HttpService o config.postRequest para hacer solicitudes POST al servidor.
+  
+Funcionamiento paso a paso
+	Carga de datos del usuario (nombre, email y rol)
+	Se obtiene el token de sesión.
+	Se hace una solicitud POST al servidor para obtener los datos del usuario.
+	Estos datos se muestran en campos deshabilitados (no editables).
+Cambio de contraseña
+	Cuando el usuario presiona "Cambiar contraseña":
+	Se valida que:
+		La contraseña nueva no esté vacía.
+		Tenga al menos 6 caracteres.
+		Coincida con la confirmación.
+	Se hace un POST al servidor con el nuevo password.
+Si el servidor responde con éxito:
+	Se muestra un mensaje de éxito en un AlertDialog.
+	Se redirige al usuario a la pantalla principal de usuario (AccionesUser).
+Manejo de errores
+Si falla la red, el token no existe o hay error en el servidor, se muestra un mensaje rojo informando lo ocurrido.
+*/
+
 class ChangePasswordScreen extends StatefulWidget {
   @override
   _ChangePasswordScreenState createState() => _ChangePasswordScreenState();

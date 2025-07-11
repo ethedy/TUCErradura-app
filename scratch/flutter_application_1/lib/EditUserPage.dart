@@ -4,6 +4,24 @@ import 'package:flutter_application_1/HttpService.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/config.dart';
 
+/*¿Qué hace este programa?
+Carga los datos del usuario desde el servidor:
+    Utiliza el email como identificador.
+    Hace una solicitud GET usando un token de autenticación.
+    Recupera el nombre, email y horarios laborales (estructura de franjas horarias por día).
+Muestra un formulario editable:
+    Campo de texto para el nombre.
+    Email mostrado pero deshabilitado.
+    Días de la semana como chips seleccionables.
+    Editor de horarios (inicio/fin) para cada día seleccionado.
+Permite modificar y guardar los cambios:
+    Se pueden agregar o quitar franjas horarias por día.
+    Al guardar, se hace una solicitud PUT al backend para actualizar los datos.
+Manejo de errores y estados:
+    Indicador de carga mientras se obtienen los datos.
+    Mensajes de error si hay problemas de conexión o si el token no está presente.
+    Diálogos (AlertDialog) para informar al usuario sobre el estado de la operación.
+*/
 class EditUserPage extends StatefulWidget {
   final String email;
 

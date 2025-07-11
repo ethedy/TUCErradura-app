@@ -6,6 +6,30 @@ import 'package:flutter_application_1/config.dart';
 import 'package:flutter_application_1/constants.dart';
 import 'package:provider/provider.dart';
 
+/*
+Carga de puertas disponibles (_fetchDoors)
+	Al iniciar, el widget llama a una API para obtener las puertas disponibles.
+	La respuesta se espera en formato JSON dentro de data['data']['doors'].
+	Las puertas se guardan en una lista y se muestran en pantalla.
+Apertura de puerta (_openDoor)
+	Cada puerta tiene un botón con un ícono de check.
+	Al presionarlo, se hace una solicitud GET al servidor para "abrir" esa puerta específica.
+	Si la solicitud es exitosa, se muestra un mensaje de éxito.
+Control de sesión
+	Usa SessionManager para verificar si el token ha expirado.
+	Si no hay token, muestra un error.
+Componentes clave
+	HttpService: para manejar solicitudes HTTP.
+	Provider<Config>: obtiene URLs y tokens.
+	SessionManager: controla el estado de sesión del usuario.
+	AlertDialog: muestra mensajes de error o éxito.
+	ListView.builder: muestra dinámicamente la lista de puertas.
+¿Qué ve el usuario?
+	Una lista de puertas con nombre.
+	Un botón para abrir cada puerta.
+	Mensajes de error o éxito según el resultado de la solicitud.
+*/
+
 class PuertasDisponiblesPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
   const PuertasDisponiblesPage({super.key, required this.username});
