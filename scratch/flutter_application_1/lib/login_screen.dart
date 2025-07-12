@@ -77,9 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
             data["token"]; // Suponemos que el token está en la respuesta
 
         if (status == "success") {
+          final config = Provider.of<Config>(context, listen: false);
           // Guardamos el token y el rol en el provider
-          await Provider.of<Config>(context, listen: false)
-              .setAuthToken(token, role);
+          await config.setAuthToken(token, role);
+          // Obtenemos nombre y apellido desde el token guardado
+          final name = await config.userName ?? '';
+          final lastname = await config.userLastName ?? '';
 
           // Redirigir al usuario según su rol
           if (role == Config.adminRole) {
@@ -87,15 +90,18 @@ class _LoginScreenState extends State<LoginScreen> {
               context,
               MaterialPageRoute(
                   builder: (context) => AccionesAdmin(
-                        username: data['name'],
+                        username: name,
                       )),
             );
           } else if (role == Config.userRole) {
-            // Si es un usuario normal, redirigimos a la pantalla común
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => AccionesUser(username: data['name'])),
+                builder: (context) => AccionesUser(
+                  username: name,
+                  lastname: lastname,
+                ),
+              ),
             );
           } else {
             // Si el rol no es reconocido, mostramos un error

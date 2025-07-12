@@ -24,21 +24,21 @@ Manejo de errores y estados:
 */
 class EditUserPage extends StatefulWidget {
   final String email;
+  final String lastname;
 
-  const EditUserPage({super.key, required this.email});
+  const EditUserPage({super.key, required this.email, required this.lastname});
 
   @override
   _EditUserPageState createState() => _EditUserPageState();
 }
 
 class _EditUserPageState extends State<EditUserPage> {
-  late String _name;
-  late String _email;
   Map<String, List<Map<String, String>>> _schedule = {};
   bool _isLoading = false;
   bool _hasError = false;
 
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
   final List<String> _daysOfWeek = [
@@ -100,6 +100,7 @@ class _EditUserPageState extends State<EditUserPage> {
         }
 
         final name = data['name'] ?? '';
+        final lastname = data['lastname'] ?? '';
         final email = data['email'] ??
             widget.email; // Usa el email del widget como fallback
         final scheduleData = Map<String, dynamic>.from(data['schedule'] ?? {});
@@ -113,10 +114,9 @@ class _EditUserPageState extends State<EditUserPage> {
         });
 
         setState(() {
-          _name = name;
-          _email = email;
           _schedule = parsedSchedule;
           _nameController.text = name;
+          _lastnameController.text = lastname;
           _emailController.text = email;
           _dataLoaded = true;
         });
@@ -157,6 +157,7 @@ class _EditUserPageState extends State<EditUserPage> {
 
       final updatedUser = {
         'name': _nameController.text.trim(),
+        'lastname': _lastnameController.text.trim(),
         'email': _emailController.text.trim(),
         'schedule': _schedule,
       };
@@ -282,6 +283,14 @@ class _EditUserPageState extends State<EditUserPage> {
                               controller: _nameController,
                               decoration: InputDecoration(
                                 labelText: 'Nombre',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            TextFormField(
+                              controller: _lastnameController,
+                              decoration: InputDecoration(
+                                labelText: 'Apellido',
                                 border: OutlineInputBorder(),
                               ),
                             ),

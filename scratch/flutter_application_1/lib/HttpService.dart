@@ -94,18 +94,12 @@ class HttpService {
     }
 
     try {
-      // Realizamos la solicitud DELETE añadiendo los headers con el token
       final response = await http.delete(
         Uri.parse(url),
         headers: _buildHeaders(token),
       );
 
-      // Comprobamos si la respuesta fue exitosa
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Error en DELETE. Código de estado: ${response.statusCode}');
-      }
-
+      // Simplemente devuelve la respuesta, sin lanzar error
       return response;
     } catch (e) {
       throw Exception('Error de conexión o de servidor: $e');

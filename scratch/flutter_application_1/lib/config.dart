@@ -81,6 +81,31 @@ class Config with ChangeNotifier {
     return await _secureStorage.read(key: 'userRole');
   }
 
+  Future<String?> get userName async {
+    final token = await authToken;
+    if (token == null) return null;
+    try {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['name'];
+    } catch (e) {
+      print('Error al decodificar el token para obtener name: $e');
+      return null;
+    }
+  }
+
+  // Método para obtener el apellido desde el token
+  Future<String?> get userLastName async {
+    final token = await authToken;
+    if (token == null) return null;
+    try {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['lastname'];
+    } catch (e) {
+      print('Error al decodificar el token para obtener lastname: $e');
+      return null;
+    }
+  }
+
   // Método para borrar el token de forma segura
   Future<void> clearAuthToken() async {
     await _secureStorage.delete(key: 'authToken'); // Borra el token

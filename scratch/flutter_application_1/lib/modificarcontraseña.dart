@@ -111,11 +111,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         final response = await config.postRequest(apiUrl, requestData);
 
         if (response.statusCode == 200) {
-          final String userName = _userData?['name'] ?? 'Usuario';
-
           setState(() {
             _isLoading = false;
           });
+          final String name = _userData?['name'] ?? '';
+          final String lastname = _userData?['lastname'] ?? '';
 
           showDialog(
             context: context,
@@ -131,8 +131,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              AccionesUser(username: userName),
+                          builder: (context) => AccionesUser(
+                            username: name,
+                            lastname: lastname,
+                          ),
                         ),
                         (route) => false,
                       );
@@ -182,6 +184,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     TextFormField(
                       initialValue: _userData!['name'] ?? '',
                       decoration: InputDecoration(labelText: 'Nombre'),
+                      enabled: false,
+                    ),
+                    TextFormField(
+                      initialValue: _userData!['lastname'] ?? '',
+                      decoration: InputDecoration(labelText: 'Apellido'),
                       enabled: false,
                     ),
                     TextFormField(

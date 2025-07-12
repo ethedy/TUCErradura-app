@@ -32,6 +32,7 @@ Componentes clave
 
 class PuertasDisponiblesPage extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
+
   const PuertasDisponiblesPage({super.key, required this.username});
 
   @override

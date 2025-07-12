@@ -10,7 +10,9 @@ import 'package:provider/provider.dart';
 
 class AccionesUser extends StatefulWidget {
   final String username; // Recibimos el nombre del usuario
-  const AccionesUser({Key? key, required this.username}) : super(key: key);
+  final String lastname; // Recibimos el Apellido
+  const AccionesUser({Key? key, required this.username, required this.lastname})
+      : super(key: key);
 
   @override
   _AccionesUserState createState() => _AccionesUserState();
@@ -76,8 +78,9 @@ class _AccionesUserState extends State<AccionesUser> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        PuertasDisponiblesPage(username: widget.username),
+                    builder: (context) => PuertasDisponiblesPage(
+                      username: widget.username,
+                    ),
                   ),
                 );
               },
@@ -104,7 +107,10 @@ class _AccionesUserState extends State<AccionesUser> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditUserPage(email: email),
+                      builder: (context) => EditUserPage(
+                        email: email,
+                        lastname: widget.lastname,
+                      ),
                     ),
                   );
                 } else {
@@ -148,7 +154,7 @@ class _AccionesUserState extends State<AccionesUser> {
                         ),
                       ),
                       Text(
-                        widget.username, // Nombre del usuario recibido
+                        '${widget.username} ${widget.lastname}', // Mostrar nombre y apellido
                         style: TextStyle(
                           fontSize: 20,
                           color: kPrimaryColor,

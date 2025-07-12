@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/AddUserPage.dart';
 import 'package:flutter_application_1/EditUserPage.dart';
 import 'package:flutter_application_1/HttpService.dart';
 import 'package:flutter_application_1/config.dart';
@@ -30,8 +31,7 @@ class UsuariosPage extends StatefulWidget {
 
 class _UsuariosPageState extends State<UsuariosPage> {
   List<Map<String, String>> usuarios = []; // Lista de usuarios
-  List<bool> selectedUsuarios =
-      []; // Lista para hacer seguimiento de la selección de usuarios
+
   bool _isLoading = false; // Para mostrar el indicador de carga
   bool _hasError = false; // Indicador de error
 
@@ -65,11 +65,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
           setState(() {
             usuarios = List<Map<String, String>>.from(data['users'].map((user) {
               return {
-                'name': user['name']?.toString() ?? 'Nombre no disponible',
-                'email': user['email']?.toString() ?? 'Email no disponible',
+                'name': user['name']?.toString() ?? '',
+                'lastname': user['lastname']?.toString() ?? '',
+                'email': user['email']?.toString() ?? '',
               };
             }));
-            selectedUsuarios = List<bool>.filled(usuarios.length, false);
           });
         } else {
           setState(() {
@@ -170,7 +170,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
         setState(() {
           // Encontramos el usuario en la lista y lo eliminamos
           usuarios.removeWhere((user) => user['email'] == email);
-          selectedUsuarios.clear(); // Limpiamos la lista de selección
         });
         _showDialog('Éxito', 'El usuario con email $email ha sido eliminado.');
       } else {
@@ -231,7 +230,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  usuario['name'] ?? 'Sin nombre',
+                                  '${usuario['name'] ?? 'Sin nombre'} ${usuario['lastname'] ?? ''}',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -259,7 +258,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
                               IconButton(
                                 icon: Icon(Icons.delete, color: Colors.red),
                                 onPressed: () {
-                                  _deleteUser(usuario['name'] ?? '');
+                                  _deleteUser(usuario['email'] ?? '');
                                 },
                               ),
                               IconButton(
@@ -270,6 +269,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
                                     MaterialPageRoute(
                                       builder: (context) => EditUserPage(
                                         email: usuario['email'] ?? '',
+                                        lastname: usuario['lastname'] ?? '',
                                       ),
                                     ),
                                   );
@@ -287,7 +287,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () {
-            // No hace nada por ahora, solo se muestra el botón
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddUserPage()),
+            ).then((_) => _fetchUsuarios()); // Recarga lista al volver
           },
           child: Text('Añadir Nuevo Usuario'),
           style: ElevatedButton.styleFrom(
