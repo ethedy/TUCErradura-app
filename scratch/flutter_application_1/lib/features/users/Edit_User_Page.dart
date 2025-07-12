@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/HttpService.dart';
+import 'package:flutter_application_1/core/services/Http_Service.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/core/config.dart';
 
 /*¿Qué hace este programa?
 Carga los datos del usuario desde el servidor:

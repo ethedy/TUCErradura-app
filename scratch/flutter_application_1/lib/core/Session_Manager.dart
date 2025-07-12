@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/config.dart';
-import 'package:flutter_application_1/login_screen.dart';
+import 'package:flutter_application_1/core/config.dart';
+import 'package:flutter_application_1/features/auth/login_screen.dart';
 
 /*SessionManager gestiona la expiración de sesión del usuario en una aplicación. 
 Funciones clave:

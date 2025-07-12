@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/HttpService.dart';
-import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/core/services/Http_Service.dart';
+import 'package:flutter_application_1/core/config.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert';
 
 class AddUserPage extends StatefulWidget {
   const AddUserPage({super.key});

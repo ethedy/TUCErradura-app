@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/AddUserPage.dart';
-import 'package:flutter_application_1/EditUserPage.dart';
-import 'package:flutter_application_1/HttpService.dart';
-import 'package:flutter_application_1/config.dart';
+import 'package:flutter_application_1/features/admin/Add_User_Page.dart';
+import 'package:flutter_application_1/features/users/Edit_User_Page.dart';
+import 'package:flutter_application_1/core/services/Http_Service.dart';
+import 'package:flutter_application_1/core/config.dart';
 import 'package:provider/provider.dart';
 
 /* 

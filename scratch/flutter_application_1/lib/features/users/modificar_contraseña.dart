@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/SessionManager.dart';
-import 'package:flutter_application_1/config.dart';
-import 'package:flutter_application_1/screen_user.dart';
+import 'package:flutter_application_1/core/Session_Manager.dart';
+import 'package:flutter_application_1/core/config.dart';
+import 'package:flutter_application_1/features/users/screen_user.dart';
 import 'package:provider/provider.dart';
 
 /*

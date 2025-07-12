@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/config.dart';
-import 'package:flutter_application_1/screen_user.dart';
-import 'package:flutter_application_1/screen_admin.dart';
+import 'package:flutter_application_1/core/config.dart';
+import 'package:flutter_application_1/features/users/screen_user.dart';
+import 'package:flutter_application_1/features/admin/screen_admin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import 'package:flutter_application_1/constants.dart';
+import 'package:flutter_application_1/core/constants.dart';
 
 //Este código define una pantalla de inicio de sesión (LoginScreen) en una app Flutter.
 //Permite que el usuario se autentique con su correo electrónico y contraseña, y según su rol (admin o user), lo redirige a una pantalla específica de la aplicación.
