@@ -27,7 +27,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 class Config with ChangeNotifier {
   // URL de la API
   String apiUrl =
-      'http://192.168.0.189:3000'; // Cambiar IP ->Revisar CMD -> ipconfig -> Direccion IPV4
+      'http://localhost:3000'; // Cambiar localhost por ip ->Revisar CMD -> ipconfig -> Direccion IPV4
 
   // Roles de usuario
   static const String adminRole = 'admin';
