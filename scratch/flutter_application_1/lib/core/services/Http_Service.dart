@@ -108,15 +108,28 @@ class HttpService {
 
   Future<http.Response> putRequest(
       String url, Map<String, dynamic> body, String token) async {
-    final response = await http.put(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode(body),
-    );
-    return response;
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: _buildHeaders(token),
+        body: json.encode(body),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception(
+            'Error en PUT. Código de estado: ${response.statusCode}');
+      }
+
+      return response;
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception('Error de conexión: $e');
+      } else if (e is TimeoutException) {
+        throw Exception('Tiempo de espera agotado: $e');
+      } else {
+        throw Exception('Error desconocido: $e');
+      }
+    }
   }
 
   // Método privado para construir los headers con el token
