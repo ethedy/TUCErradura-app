@@ -81,7 +81,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       );
       if (doorsResp.statusCode == 200) {
         final data = json.decode(doorsResp.body);
-        puertasDisponibles = List<String>.from(data['data']['doors']);
+        puertasDisponibles =
+            List<Map<String, dynamic>>.from(data['data']['doors'])
+                .map((door) => door['name'] as String)
+                .toList();
       }
 
       // Si es admin, obtener detalles
