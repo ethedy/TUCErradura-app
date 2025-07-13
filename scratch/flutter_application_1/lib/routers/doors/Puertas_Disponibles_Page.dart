@@ -100,14 +100,21 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     }
   }
 
-  Future<void> _openDoor(String doorName) async {
+  Future<void> _openDoor(String doorName, String tokenESP) async {
     setState(() => _isLoading = true);
     final token = await Provider.of<Config>(context, listen: false).authToken;
     final apiUrl =
-        '${Provider.of<Config>(context, listen: false).openDoorEndpoint}/$doorName';
+        '${Provider.of<Config>(context, listen: false).openDoorEndpoint}';
 
     try {
-      final response = await HttpService().getRequest(apiUrl, token!);
+      final response = await HttpService().postRequest(
+        Uri.parse(apiUrl),
+        {
+          'token': tokenESP,
+          'door': doorName,
+        },
+        token!, // token JWT del usuario para autorización en backend
+      );
       if (response.statusCode == 200) {
         _showDialog('Éxito', 'La puerta $doorName ha sido abierta.');
       } else {
@@ -243,7 +250,10 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                             children: [
                               IconButton(
                                 icon: Icon(Icons.check, color: Colors.green),
-                                onPressed: () => _openDoor(nombre),
+                                onPressed: () {
+                                  final tokenESP = detalle['token'] ?? '';
+                                  _openDoor(nombre, tokenESP);
+                                },
                               ),
                               if (userRole == 'admin')
                                 IconButton(
