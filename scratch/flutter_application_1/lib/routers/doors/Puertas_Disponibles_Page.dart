@@ -81,10 +81,12 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       );
       if (doorsResp.statusCode == 200) {
         final data = json.decode(doorsResp.body);
+        puertasDetalles =
+            List<Map<String, dynamic>>.from(data['data']['doors']);
+
+// Y aparte un array solo con los nombres (para el ListView)
         puertasDisponibles =
-            List<Map<String, dynamic>>.from(data['data']['doors'])
-                .map((door) => door['name'] as String)
-                .toList();
+            puertasDetalles.map((d) => d['name'] as String).toList();
       }
 
       // Si es admin, obtener detalles
@@ -92,8 +94,18 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         final detailResp = await HttpService()
             .postRequest(Uri.parse(config.doorsDetailsEndpoint), {}, token);
         if (detailResp.statusCode == 200) {
-          final data = json.decode(detailResp.body);
-          puertasDetalles = List<Map<String, dynamic>>.from(data['data']);
+          final extra = List<Map<String, dynamic>>.from(
+              json.decode(detailResp.body)['data']);
+          // Reemplaza o agrega campos en puertasDetalles según name o mac
+          for (var det in extra) {
+            final idx =
+                puertasDetalles.indexWhere((d) => d['name'] == det['name']);
+            if (idx != -1) {
+              puertasDetalles[idx].addAll(det); // merge
+            } else {
+              puertasDetalles.add(det); // nueva puerta
+            }
+          }
         }
       }
     } catch (e) {
@@ -118,6 +130,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
         },
         token!, // token JWT del usuario para autorización en backend
       );
+
       if (response.statusCode == 200) {
         _showDialog('Éxito', 'La puerta $doorName ha sido abierta.');
       } else {

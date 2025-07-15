@@ -144,7 +144,7 @@ class Config with ChangeNotifier {
   String get openDoorEndpoint =>
       '$apiUrl/door/open'; // Retorna el endpoint para abrir una puerta
 
-  // Método para obtener el endpoint de purtas detalladas
+  // Método para obtener el endpoint de puertas detalladas
   String get doorsDetailsEndpoint => '$apiUrl/doors/details';
 
   // Método para obtener el endpoint de actualizar puerta
