@@ -115,7 +115,7 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
     }
   }
 
-  Future<void> _openDoor(String doorName, String tokenESP) async {
+  Future<void> _openDoor(String doorName, String tokenESP, String mac) async {
     setState(() => _isLoading = true);
     final token = await Provider.of<Config>(context, listen: false).authToken;
     final apiUrl =
@@ -125,8 +125,9 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
       final response = await HttpService().postRequest(
         Uri.parse(apiUrl),
         {
-          'token': tokenESP,
+          'tokenESP': tokenESP,
           'door': doorName,
+          'mac': mac, // envío la mac
         },
         token!, // token JWT del usuario para autorización en backend
       );
@@ -268,7 +269,8 @@ class _PuertasDisponiblesPageState extends State<PuertasDisponiblesPage> {
                                 icon: Icon(Icons.check, color: Colors.green),
                                 onPressed: () {
                                   final tokenESP = detalle['token'] ?? '';
-                                  _openDoor(nombre, tokenESP);
+                                  final mac = detalle['mac'] ?? '';
+                                  _openDoor(nombre, tokenESP, mac);
                                 },
                               ),
                               if (userRole == 'admin')
